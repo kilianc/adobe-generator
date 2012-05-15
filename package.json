@@ -1,0 +1,27 @@
+{
+  "author": "Kilian Ciuffolo <me@nailik.org> (http://nailik.org)",
+  "name": "motherlover",
+  "description": "Realtime PSD/HTML collaboration tool",
+  "version": "0.9.0",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/kilianc/motherlover.git"
+  },
+  "main": "./",
+  "scripts": {
+    "test": "make test"
+  },
+  "engines": {
+    "node": ">= v0.8.x"
+  },
+  "dependencies": {
+    "socket.io": "0.9.x",
+    "express": "3.0.x",
+    "console-trace": "0.2.1",
+    "canvas": "0.13.x"
+  },
+  "devDependencies": {
+    "mocha": "1.3.x",
+    "chai": "1.2.x"
+  }
+}
