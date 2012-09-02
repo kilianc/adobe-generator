@@ -74,6 +74,7 @@ $().ready(function () {
   function createLayer(layer) {
     var element
     var styles = getStyle(layer)
+
     switch (layer.kind) {
       case 'LayerKind.TEXT':
         element = $('<p id="ml-' + layer.id + '" class="text">' + layer.textContent + '</p>').css(styles)
@@ -85,13 +86,8 @@ $().ready(function () {
         element = $('<div id="ml-' + layer.id + '" class="normal"></div>').css(styles)
         break
     }
-    element.css('position', 'absolute')
-    element.draggable().on('dragstop', function (e, data) {
-      var x = data.position.left - data.originalPosition.left
-      var y = data.position.top - data.originalPosition.top
-      socket.emit('move', layer.id, x, y)
-    })
-    return element
+
+    return element.css('position', 'absolute')
   }
 
   function getStyle(layer) {
@@ -101,7 +97,8 @@ $().ready(function () {
       'width': (layer.bounds[2] - layer.bounds[0])  + 'px',
       'height': (layer.bounds[3] - layer.bounds[1])  + 'px',
       'display': layer.isVisible ? 'block' : 'none',
-      'z-index': layer.index
+      'z-index': layer.index,
+      'opacity': layer.opacity
     }
 
     switch (layer.kind) {
