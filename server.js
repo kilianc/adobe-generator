@@ -1,85 +1,120 @@
-require('console-trace')({ always: true, right: true })
-
 var http = require('http'),
     fs = require('fs'),
-    fork = require('child_process').fork,
+    util = require('util'),
     io = require('socket.io'),
-    express = require('express')
+    express = require('express'),
+    layerToPng = require('./lib/layer_to_png'),
+    photoshop = require('./lib/photoshop'),
+    photoshopScripts = require('./lib/photoshop/'),
+    fixPsdPath = require('./lib/fix_psd_path'),
+    cocoa = require('./lib/cocoa_ipc')(1600000)
 
-// server config
+// stuff to do if the server is not wrapped
+if (!process.env.ML_WRAPPER) {
+  require('console-trace')({ always: true, right: true })
+  cocoa.send = console.log.bind(console)
+}
+
+// photoshop config
+var photoshop = photoshop()
+var photoshopData = {
+  layers: null,
+  currentDocumentPath: null,
+  currentDocumentWatcher: null,
+  activeTool: null,
+  fontList: null
+}
+
+// photoshop connection constants
+var POOL_TIME = Number(process.env.POOL_TIME) || 500
+var PNG_PATH = __dirname + '/public/images/layers/'
+
+// photoshop.log = true
+photoshop.on('connect', function () {
+  io.sockets.emit('motherlover::connect')
+  cocoa.send({ name: 'connect' })
+})
+
+photoshop.on('error', function (err) {
+  cocoa.send({ name: 'error', data: { message: err.message, stack: err.stack } })
+})
+
+photoshop.connect('127.0.0.1', 49494, 'password', function () {
+  // subscriptions
+  photoshop
+    .subscribe('currentDocumentChanged')
+    .subscribe('documentChanged')
+
+  photoshop.on('currentDocumentChanged', function (err, documentId) {
+    photoshop.execute(photoshopScripts.getActiveDocumentPath, function (err, response) {
+      photoshopData.currentDocumentPath = fixPsdPath(JSON.parse(response.body))
+      io.sockets.emit('currentDocumentChanged', photoshopData.currentDocumentPath)
+      cocoa.send({ name: 'currentDocumentChanged', data: photoshopData.currentDocumentPath })
+    })
+  }).emit('currentDocumentChanged')
+
+  photoshop.on('documentChanged', function (err, data) {
+    photoshop.execute(photoshopScripts.getLayersData, function (err, response) {
+      if (err) {
+        cocoa.send({ name: 'error', data: { message: err.message, stack: err.stack, response: response.body } })
+      } else {
+        photoshopData.layers = JSON.parse(response.body)
+        photoshopData.layers.forEach(prepareLayerData.bind(null, photoshopData.currentDocumentPath, PNG_PATH))
+        io.sockets.emit('layers', photoshopData.layers)
+        cocoa.send({ name: 'layers', data: photoshopData.layers })
+      }
+    })
+  }).emit('documentChanged')
+
+  photoshop.execute(photoshopScripts.getFontList, function (err, response) {
+    if (err) {
+      cocoa.send({ name: 'error', data: { message: err.message, stack: err.stack } })
+    } else {
+      photoshopData.fontList = JSON.parse(response.body)
+      cocoa.send({ name: 'fontList', data: photoshopData.fontList })
+    }
+  })
+})
+
+function prepareLayerData(currentDocumentPath, pngPath, layer) {
+  if (/\.png$/.test(layer.name)) {
+    layer.kind = 'LayerKind.NORMAL'
+  } else {
+    layer.name += '.png'
+  }
+
+  if (layer.kind === 'LayerKind.NORMAL') {
+    layerToPng(layer.id, currentDocumentPath, pngPath + layer.name, function (err) {
+      if (err) {
+        cocoa.send({ name: 'error', data: { message: err.message, stack: err.stack } })
+      } else {
+        layer.isPngReady = true
+        io.sockets.emit('layerPngReady', layer.id)
+        cocoa.send({ name: 'layerPngReady', data: layer.id })
+      }
+    })
+  } else if (layer.kind === 'LayerKind.TEXT') {
+    layer.textSize = layer.textSize
+  }
+
+  return layer
+}
+
+// http server
 var app = express()
 var server = http.createServer(app)
-var io = io.listen(server)
+var io = io.listen(server, { log: false })
 
-// photoshop data
-var layers = null
-var currentDocument = null
-var currentDocumentWatcher = null
-var activeTool = null
-var fontList = null
-
-io.set('log level', 0)
 io.sockets.on('connection', function (socket) {
-  socket.on('move', function (layerId, x, y) {
-    psConnection.send({ name: 'move', data: { layerId: layerId, x: x, y: y } })
-  }).on('selectTool', function (toolId) {
-    psConnection.send({ name: 'selectTool', data: toolId })
-  }).on('setLayerFont', function (layerId, font) {
-    psConnection.send({ name: 'setLayerFont', data: { layerId: layerId, font: font } })
-  })
-  io.sockets.emit('fontList', fontList)
-  io.sockets.emit('layers', layers)
-  io.sockets.emit('currentDocumentChanged', currentDocument)
+  io.sockets.emit('fontList', photoshopData.fontList)
+  io.sockets.emit('layers', photoshopData.layers)
+  io.sockets.emit('currentDocumentChanged', photoshopData.currentDocumentPath)
 })
 
 app.use(express.static(__dirname + '/public'))
 server.listen(process.env.PORT || 80)
 
-// ugliest thig eva.
-var psConnection
-(function spawn() {
-  psConnection && psConnection.kill()
-  psConnection = fork(__dirname + '/lib/photoshop_process.js')
-  psConnection.on('message', function (message) {
-    if (message.name === 'error') {
-      console.warn(' • motherlover::respawning -> %s', message.err.message)
-      return spawn()
-    }
-    onMessage(message)
-  })
-})()
-
-function onMessage(message) {
-  switch (message.name) {
-    case 'connect':
-      console.info(' • motherlover::connected')
-      io.sockets.emit('motherlover::connect')
-    break
-    case 'error':
-      console.error(' • motherlover::error %s', message.err.message)
-      io.sockets.emit('motherlover::disconnect')
-    break
-    case 'currentDocumentChanged':
-      console.info(' • motherlover::currentDocumentChanged', message.data)
-      currentDocument = message.data
-      io.sockets.emit('currentDocumentChanged', message.data)
-    break
-    case 'layers':
-      console.info(' • motherlover::layers', message.data.map(function (layer) { return layer.name }))
-      layers = message.data
-      io.sockets.emit('layers', message.data)
-    break
-    case 'toolChanged':
-      console.info(' • motherlover::toolChanged', message.data)
-      activeTool = message.data
-      io.sockets.emit('toolChanged', message.data)
-    break
-    case 'fontList':
-      console.info(' • motherlover::fontList', message.data.length)
-      fontList = message.data
-    break
-    default:
-      console.info(' • motherlover::%s', message.name, message.data)
-      io.sockets.emit(message.name, message.data)
-  }
-}
+process.on('uncaughtException', function (err) {
+  cocoa.send({ name: 'error', data: { message: err.message, stack: err.stack } })
+  process.kill()
+})
