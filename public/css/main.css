@@ -1,89 +1,17 @@
-
-/* line 1 : /Users/kilian/.nvm/v0.8.7/lib/node_modules/workflow/node_modules/stylus/lib/functions/index.styl */
-
-/* line 11 : /Users/kilian/.nvm/v0.8.7/lib/node_modules/workflow/node_modules/nib/lib/nib/index.styl */
-
-/* line 455 : /Users/kilian/.nvm/v0.8.7/lib/node_modules/workflow/node_modules/nib/lib/nib/vendor.styl */
-
-/* line 455 : /Users/kilian/.nvm/v0.8.7/lib/node_modules/workflow/node_modules/nib/lib/nib/config.styl */
-
-/* line 5 : /Users/kilian/.nvm/v0.8.7/lib/node_modules/workflow/node_modules/nib/lib/nib/text/index.styl */
-
-/* line 2 : /Users/kilian/.nvm/v0.8.7/lib/node_modules/workflow/node_modules/nib/lib/nib/text/aliases.styl */
-
-/* line 2 : /Users/kilian/.nvm/v0.8.7/lib/node_modules/workflow/node_modules/nib/lib/nib/text/ellipsis.styl */
-
-/* line 11 : /Users/kilian/.nvm/v0.8.7/lib/node_modules/workflow/node_modules/nib/lib/nib/text/hide-text.styl */
-
-/* line 3 : /Users/kilian/.nvm/v0.8.7/lib/node_modules/workflow/node_modules/nib/lib/nib/reset.styl */
-
-/* line 3 : /Users/kilian/.nvm/v0.8.7/lib/node_modules/workflow/node_modules/nib/lib/nib/positions.styl */
-
-/* line 2 : /Users/kilian/.nvm/v0.8.7/lib/node_modules/workflow/node_modules/nib/lib/nib/clearfix.styl */
-
-/* line 30 : /Users/kilian/.nvm/v0.8.7/lib/node_modules/workflow/node_modules/nib/lib/nib/overflow.styl */
-
-/* line 2 : /Users/kilian/.nvm/v0.8.7/lib/node_modules/workflow/node_modules/nib/lib/nib/iconic.styl */
-
-/* line 149 : /Users/kilian/.nvm/v0.8.7/lib/node_modules/workflow/node_modules/nib/lib/nib/gradients.styl */
-
-/* line 149 : /Users/kilian/.nvm/v0.8.7/lib/node_modules/workflow/node_modules/nib/lib/nib/config.styl */
-
-/* line 2 : /Users/kilian/.nvm/v0.8.7/lib/node_modules/workflow/node_modules/nib/lib/nib/box.styl */
-
-/* line 2 : /Users/kilian/.nvm/v0.8.7/lib/node_modules/workflow/node_modules/nib/lib/nib/color-image.styl */
-
-/* line 1 : /Volumes/WS/motherlover/stylus/config.styl */
-
-/* line 4 : /Users/kilian/.nvm/v0.8.7/lib/node_modules/workflow/node_modules/nib/lib/nib/reset.styl */
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-weight:inherit;font-style:inherit;font-family:inherit;font-size:100%;vertical-align:baseline}
-
-/* line 7 : /Users/kilian/.nvm/v0.8.7/lib/node_modules/workflow/node_modules/nib/lib/nib/reset.styl */
 body{line-height:1;color:#000;background:#fff}
-
-/* line 9 : /Users/kilian/.nvm/v0.8.7/lib/node_modules/workflow/node_modules/nib/lib/nib/reset.styl */
 ol,ul{list-style:none}
-
-/* line 11 : /Users/kilian/.nvm/v0.8.7/lib/node_modules/workflow/node_modules/nib/lib/nib/reset.styl */
 table{border-collapse:separate;border-spacing:0;vertical-align:middle}
-
-/* line 13 : /Users/kilian/.nvm/v0.8.7/lib/node_modules/workflow/node_modules/nib/lib/nib/reset.styl */
 caption,th,td{text-align:left;font-weight:normal;vertical-align:middle}
-
-/* line 15 : /Users/kilian/.nvm/v0.8.7/lib/node_modules/workflow/node_modules/nib/lib/nib/reset.styl */
 a img{border:none}
-
-/* line 58 : /Users/kilian/.nvm/v0.8.7/lib/node_modules/workflow/node_modules/nib/lib/nib/reset.styl */
 article,aside,canvas,details,figcaption,figure,footer,header,hgroup,menu,nav,section,summary{margin:0;padding:0;border:0;outline:0;display:block}
-
-/* line 61 : /Users/kilian/.nvm/v0.8.7/lib/node_modules/workflow/node_modules/nib/lib/nib/reset.styl */
 audio,canvas,video{display:inline-block;*display:inline;*zoom:1}
-
-/* line 65 : /Users/kilian/.nvm/v0.8.7/lib/node_modules/workflow/node_modules/nib/lib/nib/reset.styl */
 audio:not([controls]),[hidden]{display:none}
-
-/* line 2 : /Volumes/WS/motherlover/stylus/fonts/helveticaneueltstd-md.styl */
 @font-face{font-family:'HelveticaNeueLTStdMedium';src:url("../fonts/helveticaneueltstd-md.eot");src:url("../fonts/helveticaneueltstd-md.eot?#iefix") format('embedded-opentype'),url("../fonts/helveticaneueltstd-md.woff") format('woff'),url("../fonts/helveticaneueltstd-md.ttf") format('truetype');font-weight:normal;font-style:normal}
-
-/* line 12 : /Volumes/WS/motherlover/stylus/fonts/helveticaneueltstd-bd.styl */
 @font-face{font-family:'HelveticaNeueLTStdBold';src:url("../fonts/helveticaneueltstd-bd.eot");src:url("../fonts/helveticaneueltstd-bd.eot?#iefix") format('embedded-opentype'),url("../fonts/helveticaneueltstd-bd.woff") format('woff'),url("../fonts/helveticaneueltstd-bd.ttf") format('truetype');font-weight:normal;font-style:normal}
-
-/* line 12 : /Volumes/WS/motherlover/stylus */
 *:focus{outline:none}
-
-/* line 15 : /Volumes/WS/motherlover/stylus */
 *{-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box}
-
-/* line 18 : /Volumes/WS/motherlover/stylus */
 ::selection{background:#ff0;color:#fff;text-shadow:none;opacity:.5;-ms-filter:progid:DXImageTransform.Microsoft.Alpha(Opacity=50);filter:alpha(opacity=50)}
-
-/* line 24 : /Volumes/WS/motherlover/stylus */
 body{background:#181818;color:#fff}
-
-/* line 28 : /Volumes/WS/motherlover/stylus */
 #canvas{position:relative;width:80%;height:500px;margin:0 auto;background:#fff;overflow:hidden}
-
-/* line 36 : /Volumes/WS/motherlover/stylus */
 #canvas div,#canvas p{position:absolute;background-repeat:no-repeat}
-
-/* line 40 : /Volumes/WS/motherlover/stylus */
