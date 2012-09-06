@@ -1,104 +1,53 @@
 var http = require('http'),
     fs = require('fs'),
-    util = require('util'),
     io = require('socket.io'),
     express = require('express'),
-    layerToPng = require('./lib/layer_to_png'),
-    photoshop = require('./lib/photoshop'),
-    photoshopScripts = require('./lib/photoshop/'),
-    fixPsdPath = require('./lib/fix_psd_path'),
-    cocoa = require('./lib/cocoa_ipc')(1600000)
+    freeport = require('freeport'),
+    rimraf = require('rimraf'),
+    cocoa = require('./lib/cocoa')(15000),
+    motherlover = require('./lib/motherlover')
 
-// stuff to do if the server is not wrapped
-if (!process.env.ML_WRAPPER) {
-  require('console-trace')({ always: true, right: true })
-  cocoa.send = console.log.bind(console)
-}
+// cleanup
+rimraf.sync(__dirname + '/public/images/layers')
+fs.mkdirSync(__dirname + '/public/images/layers')
 
-// photoshop config
-var photoshop = photoshop()
-var photoshopData = {
-  layers: null,
-  currentDocumentPath: null,
-  currentDocumentWatcher: null,
-  activeTool: null,
-  fontList: null
-}
-
-// photoshop connection constants
-var POOL_TIME = Number(process.env.POOL_TIME) || 500
-var PNG_PATH = __dirname + '/public/images/layers/'
-
-// photoshop.log = true
-photoshop.on('connect', function () {
-  io.sockets.emit('motherlover::connect')
-  cocoa.send({ name: 'connect' })
+// PS connection
+var motherloverClient = motherlover()
+motherloverClient.on('layers', function (layers) {
+  io.sockets.emit('layers', layers)
+  process.cocoaSend({ name: 'layers', data: layers })
+}).on('currentDocumentChanged', function (currentDocumentPath) {
+  io.sockets.emit('currentDocumentChanged', currentDocumentPath)
+  process.cocoaSend({ name: 'currentDocumentChanged', data: currentDocumentPath })
+}).on('layerPngReady', function (layer) {
+  io.sockets.emit('layerPngReady', layer.id)
+  process.cocoaSend({ name: 'layerPngReady', data: layer.id })
+}).on('error', function (err, response) {
+  process.cocoaSend({ name: 'error', data: {
+    message: err.message,
+    stack: err.stack,
+    response: response,
+    code: err.code
+  } })
 })
 
-photoshop.on('error', function (err) {
-  cocoa.send({ name: 'error', data: { message: err.message, stack: err.stack } })
-})
-
-photoshop.connect('127.0.0.1', 49494, 'password', function () {
-  // subscriptions
-  photoshop
-    .subscribe('currentDocumentChanged')
-    .subscribe('documentChanged')
-
-  photoshop.on('currentDocumentChanged', function (err, documentId) {
-    photoshop.execute(photoshopScripts.getActiveDocumentPath, function (err, response) {
-      photoshopData.currentDocumentPath = fixPsdPath(JSON.parse(response.body))
-      io.sockets.emit('currentDocumentChanged', photoshopData.currentDocumentPath)
-      cocoa.send({ name: 'currentDocumentChanged', data: photoshopData.currentDocumentPath })
-    })
-  }).emit('currentDocumentChanged')
-
-  photoshop.on('documentChanged', function (err, data) {
-    photoshop.execute(photoshopScripts.getLayersData, function (err, response) {
-      if (err) {
-        cocoa.send({ name: 'error', data: { message: err.message, stack: err.stack, response: response.body } })
-      } else {
-        photoshopData.layers = JSON.parse(response.body)
-        photoshopData.layers.forEach(prepareLayerData.bind(null, photoshopData.currentDocumentPath, PNG_PATH))
-        io.sockets.emit('layers', photoshopData.layers)
-        cocoa.send({ name: 'layers', data: photoshopData.layers })
-      }
-    })
-  }).emit('documentChanged')
-
-  photoshop.execute(photoshopScripts.getFontList, function (err, response) {
-    if (err) {
-      cocoa.send({ name: 'error', data: { message: err.message, stack: err.stack } })
-    } else {
-      photoshopData.fontList = JSON.parse(response.body)
-      cocoa.send({ name: 'fontList', data: photoshopData.fontList })
-    }
-  })
-})
-
-function prepareLayerData(currentDocumentPath, pngPath, layer) {
-  if (/\.png$/.test(layer.name)) {
-    layer.kind = 'LayerKind.NORMAL'
-  } else {
-    layer.name += '.png'
+process.on('cocoaMessage', function (message) {
+  message.name !== 'ping' && process.cocoaSend({ name: 'back', message: message })
+  switch (message.name) {
+    case 'connect':
+      motherloverClient.connect(message.host, message.port, message.password, function (err) {
+        if (!err) {
+          process.cocoaSend({ name: 'connected' })
+          console.error(message)
+        }
+      })
+    break
+    case 'disconnect':
+      motherloverClient.close()
+      process.cocoaSend({ name: 'disconnected' })
+    break
   }
-
-  if (layer.kind === 'LayerKind.NORMAL') {
-    layerToPng(layer.id, currentDocumentPath, pngPath + layer.name, function (err) {
-      if (err) {
-        cocoa.send({ name: 'error', data: { message: err.message, stack: err.stack } })
-      } else {
-        layer.isPngReady = true
-        io.sockets.emit('layerPngReady', layer.id)
-        cocoa.send({ name: 'layerPngReady', data: layer.id })
-      }
-    })
-  } else if (layer.kind === 'LayerKind.TEXT') {
-    layer.textSize = layer.textSize
-  }
-
-  return layer
-}
+})
 
 // http server
 var app = express()
@@ -106,15 +55,20 @@ var server = http.createServer(app)
 var io = io.listen(server, { log: false })
 
 io.sockets.on('connection', function (socket) {
-  io.sockets.emit('fontList', photoshopData.fontList)
-  io.sockets.emit('layers', photoshopData.layers)
-  io.sockets.emit('currentDocumentChanged', photoshopData.currentDocumentPath)
+  io.sockets.emit('fontList', motherloverClient.photoshopData.fontList || [])
+  io.sockets.emit('layers', motherloverClient.photoshopData.layers || [])
+  io.sockets.emit('currentDocumentChanged', motherloverClient.photoshopData.currentDocumentPath || '')
 })
 
 app.use(express.static(__dirname + '/public'))
-server.listen(process.env.PORT || 80)
+
+freeport(function(err, port) {
+  server.listen(port)
+  process.cocoaSend({ name: 'httpPort', data: port })
+})
 
 process.on('uncaughtException', function (err) {
-  cocoa.send({ name: 'error', data: { message: err.message, stack: err.stack } })
+  process.cocoaSend({ name: 'error', data: { message: err.message, stack: err.stack, code: 'UNCAUGHT_EXCEPTION' } })
+  console.error(err)
   process.kill()
 })
