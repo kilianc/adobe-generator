@@ -26,6 +26,13 @@ enumMap[stringIDToTypeID('underlineOnLeftInVertical')] = 'underlineOnLeftInVerti
 
 
 var idMap = {}
+idMap['transform'] = stringIDToTypeID('transform')
+idMap['xx'] = stringIDToTypeID('xx')
+idMap['xy'] = stringIDToTypeID('xy')
+idMap['yx'] = stringIDToTypeID('yx')
+idMap['yy'] = stringIDToTypeID('yy')
+idMap['tx'] = stringIDToTypeID('tx')
+idMap['ty'] = stringIDToTypeID('ty')
 idMap['textKey'] = stringIDToTypeID('textKey')
 idMap['textStyleRange'] = stringIDToTypeID('textStyleRange')
 idMap['from'] = stringIDToTypeID('from')
@@ -77,8 +84,22 @@ function getLayerData(doc, layer) {
   if (layerData.kind === 'LayerKind.TEXT') {
     var textKey = getLayerAttr(layer, idMap['textKey']).getObjectValue(idMap['textKey'])
     layerData.textContent = textKey.getString(idMap['textKey'])
-    layerData.textStyles = textStyleRangeToArray(textKey.getList(idMap['textStyleRange']))
-    layerData.paragraphStyles = paragraphStyleRangeToArray(textKey.getList(idMap['paragraphStyleRange']))
+
+    if (layerData.textContent) {
+      // expose matrix if exists
+      if (textKey.hasKey(idMap['transform'])) {
+        var transformDescriptor = textKey.getObjectValue(idMap['transform'])
+        layerData.transform = {}
+        ;['xx', 'xy', 'yx', 'yy', 'tx', 'ty'].forEach(function (entry) {
+          layerData.transform[entry] = transformDescriptor.getDouble(idMap[entry])
+        })
+      } else {
+        layerData.transform = false
+      }
+      // styles
+      layerData.textStyles = textStyleRangeToArray(textKey.getList(idMap['textStyleRange']))
+      layerData.paragraphStyles = paragraphStyleRangeToArray(textKey.getList(idMap['paragraphStyleRange']))
+    }
   } else if (layerData.kind === 'LayerKind.SOLIDFILL') {
     layerData.fillColor = getFillLayerColor(layer)
   }
@@ -104,20 +125,20 @@ function textStyleRangeToArray(textStyleRange) {
       to: styleRange.getInteger(idMap['to']),
       fontPostScriptName: textStyle.getString(idMap['fontPostScriptName']),
       fontName: textStyle.getString(idMap['fontName']),
-      size: textStyle.getDouble(idMap['size']),
-      horizontalScale: textStyle.getInteger(idMap['horizontalScale']),
-      verticalScale: textStyle.getInteger(idMap['verticalScale']),
-      syntheticBold: Boolean(textStyle.getBoolean(idMap['syntheticBold'])),
-      syntheticItalic: Boolean(textStyle.getBoolean(idMap['syntheticItalic'])),
-      autoLeading: Boolean(textStyle.getBoolean(idMap['autoLeading'])),
-      leading: textStyle.getInteger(idMap['leading']),
-      tracking: textStyle.getInteger(idMap['tracking']),
-      baselineShift: textStyle.getInteger(idMap['baselineShift']),
-      autoKern: enumMap[textStyle.getEnumerationValue(idMap['autoKern'])],
-      fontCaps: enumMap[textStyle.getEnumerationValue(idMap['fontCaps'])],
-      baseline: enumMap[textStyle.getEnumerationValue(idMap['baseline'])],
-      strikethrough: enumMap[textStyle.getEnumerationValue(idMap['strikethrough'])],
-      underline: enumMap[textStyle.getEnumerationValue(idMap['underline'])],
+      size: Math.round(textStyle.getDouble(idMap['size'])),
+      horizontalScale: textStyle.hasKey(idMap['horizontalScale']) ? Math.round(textStyle.getDouble(idMap['horizontalScale'])) : 0,
+      verticalScale: textStyle.hasKey(idMap['verticalScale']) ? Math.round(textStyle.getDouble(idMap['verticalScale'])) : 0,
+      syntheticBold: textStyle.hasKey(idMap['syntheticBold']) ? Boolean(textStyle.getBoolean(idMap['syntheticBold'])) : false,
+      syntheticItalic: textStyle.hasKey(idMap['syntheticItalic']) ? Boolean(textStyle.getBoolean(idMap['syntheticItalic'])) : false,
+      autoLeading: textStyle.hasKey(idMap['autoLeading']) ? Boolean(textStyle.getBoolean(idMap['autoLeading'])) : true,
+      leading: textStyle.hasKey(idMap['leading']) ? textStyle.getInteger(idMap['leading']) : 'auto',
+      tracking: textStyle.hasKey(idMap['tracking']) ? textStyle.getInteger(idMap['tracking']) : 0,
+      baselineShift: textStyle.hasKey(idMap['baselineShift']) ? textStyle.getInteger(idMap['baselineShift']) : 0,
+      autoKern: textStyle.hasKey(idMap['autoKern']) ? enumMap[textStyle.getEnumerationValue(idMap['autoKern'])] : 'metricsKern',
+      fontCaps: textStyle.hasKey(idMap['fontCaps']) ? enumMap[textStyle.getEnumerationValue(idMap['fontCaps'])] : 'normal',
+      baseline: textStyle.hasKey(idMap['baseline']) ? enumMap[textStyle.getEnumerationValue(idMap['baseline'])] : 'normal',
+      strikethrough: textStyle.hasKey(idMap['strikethrough']) ? enumMap[textStyle.getEnumerationValue(idMap['strikethrough'])] : 'strikethroughOff',
+      underline: textStyle.hasKey(idMap['underline']) ? enumMap[textStyle.getEnumerationValue(idMap['underline'])] : 'underlineOff',
       color: colorDescriptorToHexColor(textStyle.getObjectValue(idMap['color']))
     })
   }
@@ -135,12 +156,12 @@ function paragraphStyleRangeToArray(paragraphStyleRange) {
       from: paragraphRange.getInteger(idMap['from']),
       to: paragraphRange.getInteger(idMap['to']),
       align: enumMap[paragraphStyle.getEnumerationValue(idMap['align'])],
-      hyphenate: Boolean(paragraphStyle.getBoolean(idMap['hyphenate'])),
+      hyphenate: paragraphStyle.hasKey(idMap['hyphenate']) ? Boolean(paragraphStyle.getBoolean(idMap['hyphenate'])) : true,
       firstLineIndent: paragraphStyle.getInteger(idMap['firstLineIndent']),
       startIndent: paragraphStyle.getInteger(idMap['startIndent']),
       endIndent: paragraphStyle.getInteger(idMap['endIndent']),
       spaceBefore: paragraphStyle.getInteger(idMap['spaceBefore']),
-      spaceAfter: paragraphStyle.getInteger(idMap['spaceAfter'])
+      spaceAfter: paragraphStyle.hasKey(idMap['spaceAfter']) ? paragraphStyle.getInteger(idMap['spaceAfter']) : 0
     })
   }
 
@@ -168,3 +189,24 @@ function colorDescriptorToHexColor(colorDescriptor) {
   color.rgb.blue = colorDescriptor.getInteger(idMap['blue'])
   return '#' + color.rgb.hexValue
 }
+
+// ES5 15.4.4.18 Array.prototype.forEach ( callbackfn [ , thisArg ] )
+// From https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/forEach
+if (!Array.prototype.forEach) {
+  Array.prototype.forEach = function (fun /*, thisp */) {
+    if (this === void 0 || this === null) { throw new TypeError(); }
+
+    var t = Object(this);
+    var len = t.length >>> 0;
+    if (typeof fun !== "function") { throw new TypeError(); }
+
+    var thisp = arguments[1], i;
+    for (i = 0; i < len; i++) {
+      if (i in t) {
+        fun.call(thisp, t[i], i, t);
+      }
+    }
+  };
+}
+
+getLayerData(app.activeDocument, app.activeDocument.activeLayer)
