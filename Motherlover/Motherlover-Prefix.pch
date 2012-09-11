@@ -1,0 +1,7 @@
+//
+// Prefix header for all source files of the 'Motherlover' target in the 'Motherlover' project
+//
+
+#ifdef __OBJC__
+	#import <Cocoa/Cocoa.h>
+#endif

@@ -1,0 +1,45 @@
+// libs
+@import 'nib'
+@import 'config'
+
+global-reset()
+reset-html5()
+
+// fonts
+@import 'fonts/helveticaneueltstd-md'
+@import 'fonts/helveticaneueltstd-bd'
+
+*:focus
+	outline: none
+
+*
+	box-sizing: border-box
+
+::selection
+	background: yellow
+	color: #fff
+	text-shadow: none
+	opacity: 0.5
+
+body
+	background: #181818
+	color: #fff
+
+#canvas
+	position: relative
+	width: 80%
+	height: 500px
+	margin: 0 auto
+	background: #fff
+	overflow: hidden
+
+#canvas div, #canvas p
+	position: absolute
+	background-repeat: no-repeat
+
+#canvas div.normal
+  background: #fff url('../images/ajax-loader.gif') no-repeat 50%
+  opacity: 0.5
+
+#canvas .solidfill
+	//

@@ -1,0 +1,17 @@
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-weight:inherit;font-style:inherit;font-family:inherit;font-size:100%;vertical-align:baseline}
+body{line-height:1;color:#000;background:#fff}
+ol,ul{list-style:none}
+table{border-collapse:separate;border-spacing:0;vertical-align:middle}
+caption,th,td{text-align:left;font-weight:normal;vertical-align:middle}
+a img{border:none}
+article,aside,canvas,details,figcaption,figure,footer,header,hgroup,menu,nav,section,summary{margin:0;padding:0;border:0;outline:0;display:block}
+audio,canvas,video{display:inline-block;*display:inline;*zoom:1}
+audio:not([controls]),[hidden]{display:none}
+@font-face{font-family:'HelveticaNeueLTStdMedium';src:url("../fonts/helveticaneueltstd-md.eot");src:url("../fonts/helveticaneueltstd-md.eot?#iefix") format('embedded-opentype'),url("../fonts/helveticaneueltstd-md.woff") format('woff'),url("../fonts/helveticaneueltstd-md.ttf") format('truetype');font-weight:normal;font-style:normal}
+@font-face{font-family:'HelveticaNeueLTStdBold';src:url("../fonts/helveticaneueltstd-bd.eot");src:url("../fonts/helveticaneueltstd-bd.eot?#iefix") format('embedded-opentype'),url("../fonts/helveticaneueltstd-bd.woff") format('woff'),url("../fonts/helveticaneueltstd-bd.ttf") format('truetype');font-weight:normal;font-style:normal}
+*:focus{outline:none}
+*{-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box}
+::selection{background:#ff0;color:#fff;text-shadow:none;opacity:.5;-ms-filter:progid:DXImageTransform.Microsoft.Alpha(Opacity=50);filter:alpha(opacity=50)}
+body{background:#181818;color:#fff}
+#canvas{position:relative;width:80%;height:500px;margin:0 auto;background:#fff;overflow:hidden}
+#canvas div,#canvas p{position:absolute;background-repeat:no-repeat}
