@@ -34,25 +34,25 @@
 	[updater checkForUpdatesInBackground];
 	
 	uuid = [JKSystemInfo UUID];
-
+	
 	services = [NSMutableArray array];
-    servicesBrowser = [NSNetServiceBrowser new];
-    [servicesBrowser setDelegate:self];
-
+	servicesBrowser = [NSNetServiceBrowser new];
+	[servicesBrowser setDelegate:self];
+	
 	[NSThread detachNewThreadSelector:@selector(lookupLocalAddress) toTarget:self withObject:nil];
-
+	
 	[[NSUserNotificationCenter defaultUserNotificationCenter] setDelegate:self];
-
+	
 	scriptPath = [NSString stringWithFormat:@"%@/%@", [[NSBundle mainBundle] resourcePath], @"server"];
-
+	
 	nodeProcess = [KCNodeJS process];
 	[nodeProcess setDelegate:self];
 	[nodeProcess launchScriptPath:scriptPath scriptName:@"server" andEnvironment:@{ @"PORT": @8080 }];
-
+	
 	statusItem = [[NSStatusBar systemStatusBar] statusItemWithLength:NSVariableStatusItemLength];
 	[statusItem setImage:[NSImage imageNamed:@"statusbar"]];
 	[statusItem.image setTemplate:YES];
-    [statusItem setHighlightMode:YES];
+	[statusItem setHighlightMode:YES];
 	[statusItem setMenu:statusBarMenu];
 	
 	[launchBrowserMenuItem setEnabled:NO];
@@ -80,12 +80,12 @@
 - (void)connectToPhotoshop:(NSMenuItem *)sender
 {
 	NSDictionary *data = [sender representedObject];
-
+	
 	selectedServiceName = [data valueForKey:@"name"];
 	selectedServiceMenuItem = sender;
-
+	
 	NSString *password = [SSKeychain passwordForService:selectedServiceName account:@"motherlover"];
-
+	
 	[nodeProcess sendMessage:@{
 		@"name" : @"connect",
 		@"host" : [data valueForKey:@"host"],
@@ -120,9 +120,9 @@
 {
 	if ([notification activationType] != NSUserNotificationActivationTypeActionButtonClicked)
 		return;
-
+	
 	NSDictionary *userInfo = [notification userInfo];
-
+	
 	[[statusBarMenu itemArray] enumerateObjectsUsingBlock:^(NSMenuItem *menuItem, NSUInteger idx, BOOL *stop) {
 		if ([[menuItem.representedObject valueForKey:@"name"] isEqualToString:[userInfo valueForKey:@"name"]])
 		{
@@ -188,7 +188,7 @@
 		httpPort = [messgage objectForKey:@"data"];
 		
 		return;
-	}	
+	}
 }
 
 - (void)nodejsProcess:(KCNodeJS *)process didSentError:(NSDictionary *)error
@@ -204,7 +204,7 @@
 		[alert setInformativeText:[NSString stringWithFormat:@"The Photoshop Remote Connection (%@) seems to not be available at the moment.", selectedServiceName]];
 		[alert setAlertStyle:NSWarningAlertStyle];
 		[alert runModal];
-
+		
 		selectedServiceMenuItem = nil;
 		selectedServiceName = nil;
 		
@@ -225,13 +225,13 @@
 		
 		int index = arc4random() % [crazyList count];
 		NSDictionary *crazyItem = [crazyList objectAtIndex:index];
-
+		
 		[crazyButton setTitle:[crazyItem valueForKey:@"label"]];
 		[crazyButton setAlternateTitle:[crazyItem valueForKey:@"label"]];
-
+		
 		[promptPasswordWindow center];
 		[promptPasswordWindow makeKeyAndOrderFront:self];
-
+		
 		return;
 	}
 	
@@ -240,7 +240,7 @@
 		// REPORTING
 		return;
 	}
-
+	
 	if ([@"ESCRIPTPSUPP" isEqualToString:[error objectForKey:@"code"]])
 	{
 		NSAlert *alert = [NSAlert new];
@@ -277,7 +277,7 @@
 {
 	NSString *address = [self getStringFromAddressData:[[service addresses] objectAtIndex:0]];
 	NSMenuItem *menuItem = [NSMenuItem new];
-
+	
 	if ([localAdresses containsObject:address])
 	{
 		[menuItem setImage:[NSImage imageNamed:@"local"]];
@@ -286,7 +286,7 @@
 	{
 		[menuItem setImage:[NSImage imageNamed:@"network"]];
 	}
-
+	
 	[menuItem.image setTemplate:YES];
 	[menuItem setTitle:[service name]];
 	[menuItem setAction:@selector(connectToPhotoshop:)];
@@ -294,35 +294,35 @@
 		@"host": address,
 		@"port": [NSNumber numberWithInteger:[service port]],
 		@"name": [service name]
-	 }];
-
+	}];
+	
 	if (![[statusBarMenu itemAtIndex:2] isEnabled])
 	{
 		[statusBarMenu removeItemAtIndex:2];
 	}
-
+	
 	[statusBarMenu insertItem:menuItem atIndex:2];
-
+	
 	NSUserNotification *notification = [[NSUserNotification alloc] init];
 	[notification setTitle:@"New Remote Connection"];
 	[notification setInformativeText:[NSString stringWithFormat:@"\"%@\" is available for connections now.", [service name]]];
 	[notification setUserInfo:menuItem.representedObject];
-
+	
 	[[NSUserNotificationCenter defaultUserNotificationCenter] scheduleNotification:notification];
 	[[NSUserNotificationCenter defaultUserNotificationCenter] removeAllDeliveredNotifications];
-
+	
 	[statusItem setImage:[NSImage imageNamed:@"statusbar_notification"]];
 }
 
 - (NSString *)getStringFromAddressData:(NSData *)data
 {
-    struct sockaddr_in *socketAddress = (struct sockaddr_in *)[data bytes];
-    return [NSString stringWithFormat: @"%s", inet_ntoa(socketAddress->sin_addr)];
+	struct sockaddr_in *socketAddress = (struct sockaddr_in *)[data bytes];
+	return [NSString stringWithFormat: @"%s", inet_ntoa(socketAddress->sin_addr)];
 }
 
 - (void)netService:(NSNetService *)service didNotResolve:(NSDictionary *)errorDict
 {
-    NSLog(@"Could not resolve: %@", errorDict);
+	NSLog(@"Could not resolve: %@", errorDict);
 }
 
 - (void)netServiceBrowser:(NSNetServiceBrowser *)serviceBrowser didRemoveService:(NSNetService *)removedService moreComing:(BOOL)moreComing
@@ -330,14 +330,14 @@
 	[services filterUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(NSNetService *service, NSDictionary *bindings) {
 		return ![[service name] isEqualToString:[removedService name]];
 	}]];
-
+	
 	[[statusBarMenu itemArray] enumerateObjectsUsingBlock:^(NSMenuItem *menuItem, NSUInteger idx, BOOL *stop) {
 		if ([[[menuItem representedObject] valueForKey:@"name"] isEqualToString:[removedService name]])
 		{
 			[statusBarMenu removeItem:menuItem];
 		}
 	}];
-
+	
 	if (![services count])
 	{
 		NSMenuItem *lookingUp = [NSMenuItem new];
