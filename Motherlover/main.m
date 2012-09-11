@@ -3,7 +3,7 @@
 //  Motherlover
 //
 //  Created by Kilian Ciuffolo on 8/30/12.
-//  Copyright (c) 2012 RelaxedBit. All rights reserved.
+//  Copyright (c) 2012 Adobe Systems Incorporated. All rights reserved.
 //
 
 #import <Cocoa/Cocoa.h>

@@ -9,7 +9,7 @@
 	<key>CFBundleIconFile</key>
 	<string>Motherlover</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.relaxedbit.${PRODUCT_NAME:rfc1034identifier}</string>
+	<string>com.adobe.${PRODUCT_NAME:rfc1034identifier}</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
