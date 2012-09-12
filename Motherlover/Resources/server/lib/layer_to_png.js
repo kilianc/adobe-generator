@@ -20,6 +20,8 @@ module.exports = function layerToPng(id, psdPath, pngPath, callback) {
   })
 
   if (notFound) {
-    callback(new Error('not found: ' + id))
+    var err = new Error('PSD out of sync with fs: ' + id)
+    err.code = 'EPSDSYNC'
+    callback(err)
   }
 }

@@ -1,1 +1,1 @@
-JSON.stringify(app.activeDocument.path + '/' + app.activeDocument.name)
+JSON.stringify(app.activeDocument.fullName.fsName)

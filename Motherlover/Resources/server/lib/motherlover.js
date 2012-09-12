@@ -1,8 +1,7 @@
 var EventEmitter = require('events').EventEmitter,
     photoshop = require('./photoshop'),
     photoshopScripts = require('./photoshopScripts'),
-    layerToPng = require('./layer_to_png'),
-    fixPsdPath = require('./fix_psd_path')
+    layerToPng = require('./layer_to_png')
 
 var Motherlover = module.exports = function Motherlover() {
   if (!(this instanceof Motherlover)) {
@@ -22,7 +21,8 @@ Motherlover.prototype.connect = function connect(host, port, password, callback)
   self.photoshopData = {
     layers: null,
     currentDocumentPath: null,
-    fontList: null
+    fontList: null,
+    imagesPath: 'public/images/layers/'
   }
 
   var timeout = setTimeout(function () {
@@ -80,15 +80,11 @@ Motherlover.prototype.connect = function connect(host, port, password, callback)
   })
 
   self.photoshop.on('currentDocumentChanged', function (err, documentId) {
-    // TODO read and save PNG_PATH
-    // self.photoshop.execute(photoshopScripts.getImagesPath, function (err, response) {
-    //   photoshopData.getImagesPath = fixPsdPath(JSON.parse(response.body))
-    // })
     self.photoshop.execute(photoshopScripts.getActiveDocumentPath, function (err, response) {
       if (err) {
         self.emit('error', err, response)
       } else {
-        self.photoshopData.currentDocumentPath = response.body ? fixPsdPath(JSON.parse(response.body)) : 'NOT_SAVED_YET'
+        self.photoshopData.currentDocumentPath = response.body ? JSON.parse(response.body) : 'NOT_SAVED_YET'
         self.emit('currentDocumentChanged', self.photoshopData.currentDocumentPath)
       }
     })
@@ -121,7 +117,7 @@ Motherlover.prototype.prepareLayerData = function prepareLayerData(layer) {
     layer.name += '.png'
   }
 
-  if (layer.kind === 'LayerKind.NORMAL' && this.photoshopData.currentDocumentPath !== 'NOT_SAVED_YET' && false) {
+  if (layer.kind === 'LayerKind.NORMAL' && this.photoshopData.currentDocumentPath !== 'NOT_SAVED_YET') {
     layerToPng(layer.id, this.photoshopData.currentDocumentPath, this.photoshopData.imagesPath + layer.name, function (err) {
       if (err) {
         self.emit('error', err)
