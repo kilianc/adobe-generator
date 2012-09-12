@@ -47,7 +47,7 @@
 	
 	nodeProcess = [KCNodeJS process];
 	[nodeProcess setDelegate:self];
-	[nodeProcess launchScriptPath:scriptPath scriptName:@"server" andEnvironment:@{ @"PORT": @8080 }];
+	[nodeProcess launchScriptPath:scriptPath scriptName:@"server" andEnvironment:@{ @"DYLD_LIBRARY_PATH": @"dylib" }];
 	
 	statusItem = [[NSStatusBar systemStatusBar] statusItemWithLength:NSVariableStatusItemLength];
 	[statusItem setImage:[NSImage imageNamed:@"statusbar"]];
