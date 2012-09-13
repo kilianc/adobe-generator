@@ -72,6 +72,7 @@ $().ready(function () {
 
     switch (layer.kind) {
       case 'LayerKind.TEXT':
+        styles.width = (parseInt(styles.width, 10) + 10) + 'px'
         element = element || $('<div id="ml-' + layer.id + '" class="text"></div>')
         element.empty().append(createParagraphs(layer))
         element.css(styles)
