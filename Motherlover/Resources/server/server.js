@@ -67,7 +67,7 @@ freeport(function(err, port) {
 })
 
 process.on('uncaughtException', function (err) {
-  process.cocoaSend({ name: 'error', data: { message: err.message, stack: err.stack, code: 'UNCAUGHT_EXCEPTION' } })
   console.error(err)
+  process.cocoaSend({ name: 'error', data: { message: err.message, stack: err.stack, code: 'UNCAUGHT_EXCEPTION' } })
   process.kill()
 })
