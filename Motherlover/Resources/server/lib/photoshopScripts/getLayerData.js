@@ -155,7 +155,7 @@ function paragraphStyleRangeToArray(paragraphStyleRange) {
     paragraphStyles.push({
       from: paragraphRange.getInteger(idMap['from']),
       to: paragraphRange.getInteger(idMap['to']),
-      align: enumMap[paragraphStyle.getEnumerationValue(idMap['align'])],
+      align: paragraphStyle.hasKey(idMap['align']) ? enumMap[paragraphStyle.getEnumerationValue(idMap['align'])] : 'left',
       hyphenate: paragraphStyle.hasKey(idMap['hyphenate']) ? Boolean(paragraphStyle.getBoolean(idMap['hyphenate'])) : true,
       firstLineIndent: paragraphStyle.hasKey(idMap['firstLineIndent']) ? paragraphStyle.getInteger(idMap['firstLineIndent']) : 0,
       startIndent: paragraphStyle.hasKey(idMap['startIndent']) ? paragraphStyle.getInteger(idMap['startIndent']) : 0,
@@ -208,5 +208,3 @@ if (!Array.prototype.forEach) {
     }
   };
 }
-
-getLayerData(app.activeDocument, app.activeDocument.activeLayer)
