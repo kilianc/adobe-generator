@@ -8,3 +8,4 @@ xcuserdata/
 defines.h
 public/images/layers/
 *.psd
+/Custom.xcconfig

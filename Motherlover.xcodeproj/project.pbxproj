@@ -8,10 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		3928B27C15FBF4A400F164D4 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3928B27B15FBF4A400F164D4 /* Security.framework */; };
-		3928B28315FC33C400F164D4 /* Motherlover.app in CopyFiles */ = {isa = PBXBuildFile; fileRef = 394383B315EFCB81009E982B /* Motherlover.app */; };
 		3930008C15F74D4000146349 /* statusbar_notification.png in Resources */ = {isa = PBXBuildFile; fileRef = 3930008B15F74D4000146349 /* statusbar_notification.png */; };
 		39367C2615F9395F00D4234D /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 39367C1D15F9386500D4234D /* IOKit.framework */; };
 		39367C2715F9396E00D4234D /* Collaboration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 39367C1B15F9384500D4234D /* Collaboration.framework */; };
+		3936BEE41601359A00598C91 /* Custom.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 3936BEE31601322400598C91 /* Custom.xcconfig */; };
 		394076B315F19CC80007E7F8 /* SBJson.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 39D486B815F190460023C99A /* SBJson.framework */; };
 		394076FA15F1AC9A0007E7F8 /* SBJson.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 39D486B815F190460023C99A /* SBJson.framework */; };
 		394383B815EFCB81009E982B /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 394383B715EFCB81009E982B /* Cocoa.framework */; };
@@ -39,16 +39,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		3928B28215FC33B300F164D4 /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = /Users/kilian/Dropbox/Tim;
-			dstSubfolderSpec = 0;
-			files = (
-				3928B28315FC33C400F164D4 /* Motherlover.app in CopyFiles */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		394076F815F1AC8A0007E7F8 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -82,6 +72,7 @@
 		3930008B15F74D4000146349 /* statusbar_notification.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = statusbar_notification.png; sourceTree = "<group>"; };
 		39367C1B15F9384500D4234D /* Collaboration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Collaboration.framework; path = System/Library/Frameworks/Collaboration.framework; sourceTree = SDKROOT; };
 		39367C1D15F9386500D4234D /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
+		3936BEE31601322400598C91 /* Custom.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Custom.xcconfig; sourceTree = "<group>"; };
 		394383B315EFCB81009E982B /* Motherlover.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Motherlover.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		394383B715EFCB81009E982B /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		394383BA15EFCB81009E982B /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -161,6 +152,7 @@
 			children = (
 				394383BD15EFCB81009E982B /* Motherlover */,
 				3928B28A15FCA95300F164D4 /* Frameworks */,
+				3936BEE31601322400598C91 /* Custom.xcconfig */,
 			);
 			sourceTree = "<group>";
 		};
@@ -329,7 +321,7 @@
 				394383B115EFCB81009E982B /* Resources */,
 				3999D5CE15F08C390022D70D /* CopyFiles */,
 				394076F815F1AC8A0007E7F8 /* CopyFiles */,
-				3928B28215FC33B300F164D4 /* CopyFiles */,
+				3936BEE11601315D00598C91 /* Copy bundle to Dropbox */,
 			);
 			buildRules = (
 			);
@@ -384,10 +376,28 @@
 				3930008C15F74D4000146349 /* statusbar_notification.png in Resources */,
 				39BCA8F415FB40AA00BBEF56 /* Motherlover.icns in Resources */,
 				3964A66B15FEBF40000AC561 /* server in Resources */,
+				3936BEE41601359A00598C91 /* Custom.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		3936BEE11601315D00598C91 /* Copy bundle to Dropbox */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Copy bundle to Dropbox";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ -n \"${DROPBOX_SYNC_PATH}\" ]; then\necho cp -r ${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app ${DROPBOX_SYNC_PATH}/\n    cp -r ${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app ${DROPBOX_SYNC_PATH}/\nfi";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		394383AF15EFCB81009E982B /* Sources */ = {
@@ -487,6 +497,7 @@
 		};
 		394383D215EFCB81009E982B /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 3936BEE31601322400598C91 /* Custom.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -514,6 +525,7 @@
 		};
 		394383D315EFCB81009E982B /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 3936BEE31601322400598C91 /* Custom.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COMBINE_HIDPI_IMAGES = YES;
