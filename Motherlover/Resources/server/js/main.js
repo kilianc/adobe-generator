@@ -23,6 +23,9 @@ $().ready(function () {
     purgeLayers(layers)
     layersArray = layers
     layers.forEach(function updateDOM(layer) {
+      // skip empty text layers
+      if (layer.kind === 'LayerKind.TEXT' && layer.textContent === '') return
+
       var element = updateLayerElement(elements[layer.id], layer)
       if (!element.parent().length) {
         elements[layer.id] = element.appendTo(canvasElement)
@@ -44,6 +47,9 @@ $().ready(function () {
     var ids = newLayerSet.map(function (layer) { return layer.id })
 
     layersArray.forEach(function (layer) {
+      // skip empty text layers
+      if (layer.kind === 'LayerKind.TEXT' && layer.textContent === '') return
+
       var layerId = layer.id
 
       if (ids.indexOf(layerId) === -1 || isFormatChanged(layer)) {
