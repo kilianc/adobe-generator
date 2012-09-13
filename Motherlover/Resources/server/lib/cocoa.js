@@ -22,7 +22,11 @@ module.exports = function cocoa(keepAliveDelay) {
 
   // kill the process asap the ping stops
   keepAliveDelay = keepAliveDelay || 1500
-  var killFn = process.kill.bind(process)
+  var killFn = function onProcessTimeout() {
+    var err = new Error('Cocoa binding timedout')
+    err.code = 'EIPCTIMEDOUT'
+    process.emit('uncaughtException', err)
+  }
   var killTimeout = setTimeout(killFn, keepAliveDelay)
 
   process.stdin.on('data', function (data) {
