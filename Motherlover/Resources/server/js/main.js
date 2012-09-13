@@ -22,7 +22,13 @@ $().ready(function () {
   socket.on('layers', function (layers) {
     purgeLayers(layers)
     layersArray = layers
-    layers.forEach(configureLayer)
+    layers.forEach(function updateDOM(layer) {
+      var element = updateLayerElement(elements[layer.id], layer)
+      if (!element.parent().length) {
+        elements[layer.id] = element.appendTo(canvasElement)
+      }
+      layers[layer.id] = layer
+    })
   })
 
   socket.on('layerPngReady', function (layerId) {
@@ -34,17 +40,12 @@ $().ready(function () {
 
   socket.emit('ready')
 
-  function isFormatChanged(layer) {
-    var element = elements[layer.id]
-    var className = layer.kind.replace('LayerKind.').toLowerCase()
-    return (element !== undefined && !element.hasClass(className))
-  }
-
   function purgeLayers(newLayerSet) {
     var ids = newLayerSet.map(function (layer) { return layer.id })
 
     layersArray.forEach(function (layer) {
       var layerId = layer.id
+
       if (ids.indexOf(layerId) === -1 || isFormatChanged(layer)) {
         elements[layerId].remove()
         ;delete elements[layerId]
@@ -52,71 +53,98 @@ $().ready(function () {
     })
   }
 
-  function configureLayer(layer) {
+  function isFormatChanged(layer) {
     var element = elements[layer.id]
-
-    if (element === undefined) {
-      elements[layer.id] = createLayer(layer).appendTo(canvasElement)
-    } else {
-      element.css(getStyle(layer))
-      if (layer.kind === 'LayerKind.TEXT') {
-        element.text(layer.textContent)
-      }
-    }
-
-    layers[layer.id] = layer
-
-    if (layer.isSelected) {
-      selectedLayer = layer
-    }
+    var className = layer.kind.replace('LayerKind.', '').toLowerCase()
+    return (element !== undefined && !element.hasClass(className))
   }
 
-  function createLayer(layer) {
-    var element
-    var styles = getStyle(layer)
-
-    switch (layer.kind) {
-      case 'LayerKind.TEXT':
-        element = $('<p id="ml-' + layer.id + '" class="text">' + layer.textContent + '</p>').css(styles)
-        break
-      case 'LayerKind.SOLIDFILL':
-        element = $('<div id="ml-' + layer.id + '" class="solidfill"></div>').css(styles)
-        break
-      case 'LayerKind.NORMAL':
-        element = $('<div id="ml-' + layer.id + '" class="normal"></div>').css(styles)
-        break
-    }
-
-    return element.css('position', 'absolute')
-  }
-
-  function getStyle(layer) {
+  function updateLayerElement(element, layer) {
     var styles = {
-      'left': layer.bounds[0] + 'px',
-      'top': layer.bounds[1] + 'px',
-      'width': (layer.bounds[2] - layer.bounds[0])  + 'px',
-      'height': (layer.bounds[3] - layer.bounds[1])  + 'px',
-      'display': layer.isVisible ? 'block' : 'none',
-      'z-index': layer.index,
-      'opacity': layer.opacity
+      left: layer.bounds[0] + 'px',
+      top: layer.bounds[1] + 'px',
+      width: (layer.bounds[2] - layer.bounds[0])  + 'px',
+      height: (layer.bounds[3] - layer.bounds[1])  + 'px',
+      display: layer.isVisible ? 'block' : 'none',
+      zIndex: layer.index,
+      opacity: layer.opacity
     }
 
     switch (layer.kind) {
       case 'LayerKind.TEXT':
-        styles.color = '#' + layer.textColor
-        styles['font-family'] = layer.textFont
-        styles['font-size'] = layer.textSize
-      break
+        element = element || $('<div id="ml-' + layer.id + '" class="text"></div>')
+        element.empty().append(createParagraphs(layer))
+        element.css(styles)
+        break
       case 'LayerKind.SOLIDFILL':
-        styles['background-color'] = '#' + layer.fillColor
-      break
+        styles.backgroundColor = layer.fillColor
+        element = element || $('<div id="ml-' + layer.id + '" class="solidfill"></div>')
+        element.css(styles)
+        break
       case 'LayerKind.NORMAL':
         styles.opacity = 1
-        styles['background-color'] = 'transparent'
-        styles['background-image'] = 'url("images/layers/' + layer.name + '")'
-      break
+        styles.backgroundColor = 'transparent'
+        styles.backgroundImage = 'url("images/layers/' + layer.name + '")'
+        element = element || $('<div id="ml-' + layer.id + '" class="normal"></div>')
+        element.css(styles)
+        break
     }
 
-    return styles
+    return element
+  }
+
+  function createParagraphs(layer) {
+    var textStyles = layer.textStyles.slice(0)
+    var textContent = layer.textContent
+    var paragraphs = layer.paragraphStyles.map(function (paragraphStyle) {
+      var spans = createSpansForParagraphs(textStyles, paragraphStyle.from, paragraphStyle.to, textContent)
+      var p = $('<p>').css({
+        textAlign: paragraphStyle.align,
+        webkitHyphens: 'auto'
+      }).append(spans)
+
+      return p[0]
+    })
+
+    return paragraphs
+  }
+
+  function createSpansForParagraphs(textStyles, from, to, textContent) {
+    var textStyle, spanText, css, spans = []
+    var stylesRanges = []
+
+    for (var i = 0, l = textStyles.length; i < l; i++) {
+      textStyle = textStyles[i]
+
+      // hack related to https://github.com/kilianc/motherlover/issues/33
+      if (stylesRanges.indexOf(textStyle.from + ':' + textStyle.to) !== -1) continue
+      stylesRanges.push(textStyle.from + ':' + textStyle.to)
+
+      if (textStyle.to < from) continue
+      if (textStyle.from > to) break
+
+      spanText = textContent.substring(Math.max(textStyle.from, from), Math.min(textStyle.to, to)).replace('\n', '<br>')
+
+      css = {
+        font: textStyle.size + 'px "' + textStyle.fontPostScriptName + '"',
+        color: textStyle.color
+      }
+
+      if (textStyle.underline === 'underlineOnLeftInVertical') {
+        css.textDecoration = 'underline'
+      }
+      if (textStyle.strikethrough === 'xHeightStrikethroughOn') {
+        css.textDecoration = css.textDecoration ? css.textDecoration + ' line-through' : 'line-through'
+      }
+      if (textStyle.fontCaps === 'allCaps') {
+        css.textTransform = 'uppercase'
+      } else if (textStyle.fontCaps === 'smallCaps') {
+        css.fontVariant = 'small-caps'
+      }
+
+      spans.push($('<span>').text(spanText).css(css)[0])
+    }
+
+    return spans
   }
 })

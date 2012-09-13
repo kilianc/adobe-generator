@@ -126,8 +126,6 @@ Motherlover.prototype.prepareLayerData = function prepareLayerData(layer) {
         self.emit('layerPngReady', layer)
       }
     })
-  } else if (layer.kind === 'LayerKind.TEXT') {
-    layer.textSize = layer.textSize
   }
 
   return layer
