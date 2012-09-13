@@ -227,7 +227,7 @@
 		NSDictionary *crazyItem = [crazyList objectAtIndex:index];
 		
 		[crazyButton setTitle:[crazyItem valueForKey:@"label"]];
-		[crazyButton setAlternateTitle:[crazyItem valueForKey:@"label"]];
+		[crazyButton setAlternateTitle:[crazyItem valueForKey:@"url"]];
 		
 		[promptPasswordWindow center];
 		[promptPasswordWindow makeKeyAndOrderFront:self];
