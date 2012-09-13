@@ -6,6 +6,6 @@
 project.xcworkspace/
 xcuserdata/
 defines.h
-public/images/layers/
 *.psd
 /Custom.xcconfig
+/Motherlover/Resources/server/public/images/layers/

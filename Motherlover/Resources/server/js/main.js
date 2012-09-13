@@ -5,7 +5,7 @@ $().ready(function () {
   window.document.title = 'motherlover™'
 
   var elements = {}
-  var layers = {}
+  var layersById = {}
   var layersArray = []
   var selectedLayer = null
   var socket = io.connect()
@@ -27,15 +27,15 @@ $().ready(function () {
       if (!element.parent().length) {
         elements[layer.id] = element.appendTo(canvasElement)
       }
-      layers[layer.id] = layer
+      layersById[layer.id] = layer
     })
   })
 
   socket.on('layerPngReady', function (layerId) {
-    elements[layerId].to({
-      'background-color': 'transparent',
-      'background-image': 'url("images/layers/' + layers[layerId].name + '")'
-    }).to({ opacity: 1 }, 1)
+    elements[layerId].css({
+      backgroundColor: 'transparent',
+      backgroundImage: 'url("images/layers/' + layersById[layerId].name + '")'
+    })
   })
 
   socket.emit('ready')
