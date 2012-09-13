@@ -1,8 +1,8 @@
 var http = require('http'),
+    net = require('net'),
     fs = require('fs'),
     io = require('socket.io'),
     express = require('express'),
-    freeport = require('freeport'),
     rimraf = require('rimraf'),
     cocoa = require('./lib/cocoa')(15000),
     motherlover = require('./lib/motherlover')
@@ -61,13 +61,17 @@ io.sockets.on('connection', function (socket) {
 
 app.use(express.static(__dirname + '/public'))
 
-freeport(function(err, port) {
-  server.listen(port)
-  process.cocoaSend({ name: 'httpPort', data: port })
-})
+// get a random available port
+net.createServer().once('close', function() {
+  server.listen(this.availablePort)
+  process.cocoaSend({ name: 'httpPort', data: this.availablePort })
+}).once('listening', function() {
+  this.availablePort = this.address().port
+  this.close()
+}).listen(0)
 
 process.on('uncaughtException', function (err) {
-  console.error(err)
+  console.error(err, err.stack)
   process.cocoaSend({ name: 'error', data: { message: err.message, stack: err.stack, code: 'UNCAUGHT_EXCEPTION' } })
   process.kill()
 })

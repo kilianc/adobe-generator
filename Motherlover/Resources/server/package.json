@@ -19,8 +19,7 @@
     "express": "3.0.x",
     "canvas": "0.13.x",
     "bufferjoiner": "0.1.x",
-    "rimraf": "2.0.x",
-    "freeport": "1.0.x"
+    "rimraf": "2.0.x"
   },
   "devDependencies": {
     "mocha": "1.3.x",
