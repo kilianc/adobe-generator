@@ -157,10 +157,10 @@ function paragraphStyleRangeToArray(paragraphStyleRange) {
       to: paragraphRange.getInteger(idMap['to']),
       align: enumMap[paragraphStyle.getEnumerationValue(idMap['align'])],
       hyphenate: paragraphStyle.hasKey(idMap['hyphenate']) ? Boolean(paragraphStyle.getBoolean(idMap['hyphenate'])) : true,
-      firstLineIndent: paragraphStyle.getInteger(idMap['firstLineIndent']),
-      startIndent: paragraphStyle.getInteger(idMap['startIndent']),
-      endIndent: paragraphStyle.getInteger(idMap['endIndent']),
-      spaceBefore: paragraphStyle.getInteger(idMap['spaceBefore']),
+      firstLineIndent: paragraphStyle.hasKey(idMap['firstLineIndent']) ? paragraphStyle.getInteger(idMap['firstLineIndent']) : 0,
+      startIndent: paragraphStyle.hasKey(idMap['startIndent']) ? paragraphStyle.getInteger(idMap['startIndent']) : 0,
+      endIndent: paragraphStyle.hasKey(idMap['endIndent']) ? paragraphStyle.getInteger(idMap['endIndent']) : 0,
+      spaceBefore: paragraphStyle.hasKey(idMap['spaceBefore']) ? paragraphStyle.getInteger(idMap['spaceBefore']) : 0,
       spaceAfter: paragraphStyle.hasKey(idMap['spaceAfter']) ? paragraphStyle.getInteger(idMap['spaceAfter']) : 0
     })
   }
@@ -179,7 +179,7 @@ function getFillLayerColor(layer) {
   color.rgb.green = clrDesc.getDouble(app.charIDToTypeID('Grn '))
   color.rgb.blue = clrDesc.getDouble(app.charIDToTypeID('Bl  '))
 
-  return color.rgb.hexValue
+  return '#' + color.rgb.hexValue
 }
 
 function colorDescriptorToHexColor(colorDescriptor) {
