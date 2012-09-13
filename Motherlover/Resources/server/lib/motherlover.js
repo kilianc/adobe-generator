@@ -29,7 +29,7 @@ Motherlover.prototype.connect = function connect(host, port, password, callback)
     var err = new Error('Connection timedout')
     err.code = 'ETIMEOUT'
     self.photoshop.emit('error', err)
-  }, 200)
+  }, 500)
 
   self.photoshop.on('error', function onPSError(err) {
     if (err.code === 'ECONNREFUSED') {
