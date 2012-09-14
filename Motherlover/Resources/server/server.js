@@ -35,7 +35,7 @@ process.on('cocoaMessage', function (message) {
   message.name !== 'ping' && process.cocoaSend({ name: 'back', message: message })
   switch (message.name) {
     case 'connect':
-      motherloverClient.connect(message.host, message.port, message.password, function (err) {
+      motherloverClient.connect(message.host, message.port, message.password, 500, function (err) {
         if (!err) {
           process.cocoaSend({ name: 'connected' })
         }

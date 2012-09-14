@@ -12,7 +12,7 @@ var Motherlover = module.exports = function Motherlover() {
 
 Motherlover.prototype.__proto__ = EventEmitter.prototype
 
-Motherlover.prototype.connect = function connect(host, port, password, callback) {
+Motherlover.prototype.connect = function connect(host, port, password, timeout, callback) {
   var self = this
 
   self.photoshop && self.photoshop.destroy()
@@ -25,45 +25,23 @@ Motherlover.prototype.connect = function connect(host, port, password, callback)
     imagesPath: 'public/images/layers/'
   }
 
-  var timeout = setTimeout(function () {
-    var err = new Error('Connection timedout')
-    err.code = 'ETIMEOUT'
-    self.photoshop.emit('error', err)
-  }, 500)
-
   self.photoshop.on('error', function onPSError(err) {
-    if (err.code === 'ECONNREFUSED') {
-      clearTimeout(timeout)
-      self.close()
-      callback && callback(err)
-    } else if (err.code === 'EPIPE' || err.code === 'ECONNRESET' || err.code === 'ETIMEOUT') {
-      self.close()
-    }
     self.emit('error', err)
   })
 
-  self.photoshop.connect(host, port, password, function onPSConnect() {
-    // test password
-    self.photoshop.execute('"THE_PASSWORD_IS_RIGHT"', function (err, response) {
-      clearTimeout(timeout)
-
-      if (response.body !== 'THE_PASSWORD_IS_RIGHT') {
+  self.photoshop.connect(host, port, password, timeout, function onPSConnect() {
+    self.photoshop.execute(photoshopScripts.isScriptingSupportUpdated, function (err, response) {
+      // test scripting support
+      if (!err && response.body !== 'true') {
         err = new Error(response.body)
-        err.code = 'ECONNRESET'
+        err.code = 'ESCRIPTPSUPP'
         self.emit('error', err)
         return
       }
 
-      self.photoshop.execute(photoshopScripts.isScriptingSupportUpdated, function (err, response) {
-        // test scripting support
-        if (response.body !== 'true') {
-          err = new Error(response.body)
-          err.code = 'ESCRIPTPSUPP'
-          self.emit('error', err)
-          return
-        }
+      if (err) {
         callback(err)
-
+      } else {
         // subscriptions
         self.photoshop.subscribe('currentDocumentChanged').emit('currentDocumentChanged')
         self.photoshop.subscribe('documentChanged').emit('documentChanged')
@@ -75,7 +53,7 @@ Motherlover.prototype.connect = function connect(host, port, password, callback)
             self.photoshopData.fontList = JSON.parse(response.body)
           }
         })
-      })
+      }
     })
   })
 

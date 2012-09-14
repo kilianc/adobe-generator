@@ -211,7 +211,7 @@
 		return;
 	}
 	
-	if ([@[@"EPIPE", @"ECONNRESET", @"ETIMEOUT"] containsObject:[error objectForKey:@"code"]])
+	if ([@[@"EPIPE", @"ECONNRESET", @"ECONNTIMEOUT"] containsObject:[error objectForKey:@"code"]])
 	{
 		NSAlert *alert = [NSAlert new];
 		[alert setIcon:[NSImage imageNamed:@""]];

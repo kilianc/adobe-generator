@@ -50,16 +50,22 @@ util.inherits(module.exports, EventEmitter)
 
 PhotoShop.prototype.log = false
 
-PhotoShop.prototype.connect = function (host, port, password, callback) {
+PhotoShop.prototype.connect = function (host, port, password, timeout, callback) {
   var self = this
+
+  self.connectionTimeout = setTimeout(function onPSConnectionTimeout() {
+    var err = new Error('Connection timedout')
+    err.code = 'ECONNTIMEOUT'
+    self.emit('error', err)
+  }, timeout)
 
   crypto.pbkdf2(password, SALT, NUM_ITERATIONS, KEY_LENGTH, function (err, derivedKey) {
     self.derivedKey = derivedKey
 
     self.socket = net.createConnection(port, host, function () {
-      callback()
       self.writeQueueStatus = 'ready'
       self.commandQueueStatus = 'ready'
+      checkPassword(self, callback)
       self.deQueueCommand()
     })
 
@@ -72,7 +78,13 @@ PhotoShop.prototype.connect = function (host, port, password, callback) {
       self.deQueueWrite()
     })
 
-    self.socket.on('error', function (err) {
+    self.socket.on('error', function onSocketError(err) {
+      if (err.code === 'ECONNREFUSED') {
+        clearTimeout(self.connectionTimeout)
+        callback && callback(err)
+        callback = undefined
+      }
+      self.close()
       self.emit('error', err)
     })
 
@@ -80,6 +92,20 @@ PhotoShop.prototype.connect = function (host, port, password, callback) {
       self.emit('close', hadError)
     })
   })
+}
+
+function checkPassword(self, callback) {
+  self.execute('"THE_PASSWORD_IS_RIGHT"', function (err, response) {
+    clearTimeout(self.connectionTimeout)
+
+    if (response.body !== 'THE_PASSWORD_IS_RIGHT') {
+      err = new Error(response.body)
+      err.code = 'ECONNRESET'
+      self.emit('error', err)
+    } else {
+      callback()
+    }
+  }, true)
 }
 
 PhotoShop.prototype.enQueueCommand = function (javascript, callback, top) {
