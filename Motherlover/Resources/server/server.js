@@ -38,6 +38,8 @@ process.on('cocoaMessage', function (message) {
       motherloverClient.connect(message.host, message.port, message.password, 500, function (err) {
         if (!err) {
           process.cocoaSend({ name: 'connected' })
+        } else {
+          throw err
         }
       })
     break
