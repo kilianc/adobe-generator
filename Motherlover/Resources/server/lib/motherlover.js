@@ -39,9 +39,7 @@ Motherlover.prototype.connect = function connect(host, port, password, timeout, 
         return
       }
 
-      if (err) {
-        callback(err)
-      } else {
+      if (!err) {
         // subscriptions
         self.photoshop.subscribe('currentDocumentChanged').emit('currentDocumentChanged')
         self.photoshop.subscribe('documentChanged').emit('documentChanged')
@@ -54,6 +52,8 @@ Motherlover.prototype.connect = function connect(host, port, password, timeout, 
           }
         })
       }
+
+      callback && callback()
     })
   })
 

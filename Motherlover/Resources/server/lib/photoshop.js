@@ -103,7 +103,7 @@ function checkPassword(self, callback) {
       err.code = 'ECONNRESET'
       self.emit('error', err)
     } else {
-      callback()
+      callback & callback()
     }
   }, true)
 }
