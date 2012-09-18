@@ -1,13 +1,15 @@
-﻿function getLayerData(doc, layer) {
+function getLayerData(doc, layer) {
+  var layerBounds = layer.boundsNoEffects
   var layerData = {
     id: layer.id,
     name: layer.name,
     kind: layer.kind.toString(),
-    bounds: [layer.bounds[0].as('px'), layer.bounds[1].as('px'), layer.bounds[2].as('px'), layer.bounds[3].as('px')],
+    bounds: [layerBounds[0].as('px'), layerBounds[1].as('px'), layerBounds[2].as('px'), layerBounds[3].as('px')],
     opacity: layer.opacity,
     isVisible: layer.visible,
     index: layer.itemIndex,
-    isSelected: doc.activeLayer == layer
+    isSelected: doc.activeLayer == layer,
+    layerStyles: getLayerStyles(layer)
   }
 
   if (layerData.kind === 'LayerKind.TEXT') {
@@ -40,10 +42,12 @@
   return layerData
 }
 
+getLayerData.globalAngle = getLayerAttr(app.activeDocument.activeLayer, {sid2tid.globalAngle}).getInteger({sid2tid.globalAngle})
+
 function getLayerAttr(layer, key) {
   var ref = new ActionReference()
-  ref.putProperty(app.charIDToTypeID('Prpr'), key)
-  ref.putIndex(app.charIDToTypeID('Lyr '), layer.itemIndex)
+  ref.putProperty({sid2tid.Prpr}, key)
+  ref.putIndex({sid2tid.Lyr_}, layer.itemIndex)
   return executeActionGet(ref)
 }
 
@@ -113,6 +117,90 @@ function getFillLayerColor(layer) {
   color.rgb.blue = clrDesc.getDouble(app.charIDToTypeID('Bl  '))
 
   return '#' + color.rgb.hexValue
+}
+
+function getLayerStyles(layer) {
+  var layerEffects = getLayerAttr(layer, {sid2tid.layerEffects})
+  var layerFXVisible = getLayerAttr(layer, {sid2tid.layerFXVisible}).getBoolean({sid2tid.layerFXVisible})
+
+  if (!layerEffects.hasKey({sid2tid.layerEffects}) || !layerFXVisible) {
+    return false
+  }
+
+  layerEffects = layerEffects.getObjectValue({sid2tid.layerEffects})
+
+  return {
+    dropShadow: getShadow(layerEffects, true),
+    innerShadow: getShadow(layerEffects, false),
+    outerGlow: getGlow(layerEffects, true),
+    innerGlow: getGlow(layerEffects, false),
+    stroke: getStroke(layerEffects)
+  }
+}
+
+function getShadow(actionDescriptor, isOuter) {
+  var key = isOuter ? {sid2tid.dropShadow} : {sid2tid.innerShadow}
+
+  if (!actionDescriptor.hasKey(key)) {
+    return false
+  }
+
+  var styleDescriptor = actionDescriptor.getObjectValue(key)
+
+  if (!styleDescriptor.getBoolean({sid2tid.enabled})) {
+    return false
+  }
+
+  return {
+    color: colorDescriptorToHexColor(styleDescriptor.getObjectValue({sid2tid.color})),
+    opacity: Math.round(styleDescriptor.getDouble({sid2tid.opacity})),
+    useGlobalAngle: styleDescriptor.getInteger({sid2tid.useGlobalAngle}),
+    localLightingAngle: styleDescriptor.getInteger({sid2tid.localLightingAngle}),
+    globalAngle: getLayerData.globalAngle,
+    distance: styleDescriptor.getInteger({sid2tid.distance}),
+    chokeMatte: styleDescriptor.getInteger({sid2tid.chokeMatte}),
+    blur: styleDescriptor.getInteger({sid2tid.blur})
+  }
+}
+
+function getGlow(actionDescriptor, isOuter) {
+  var key = isOuter ? {sid2tid.outerGlow} : {sid2tid.innerGlow}
+
+  if (!actionDescriptor.hasKey(key)) {
+    return false
+  }
+
+  var styleDescriptor = actionDescriptor.getObjectValue(key)
+
+  if (!styleDescriptor.getBoolean({sid2tid.enabled})) {
+    return false
+  }
+
+  return {
+    color: colorDescriptorToHexColor(styleDescriptor.getObjectValue({sid2tid.color})),
+    opacity: Math.round(styleDescriptor.getDouble({sid2tid.opacity})),
+    spread: styleDescriptor.getInteger({sid2tid.chokeMatte}),
+    blur: styleDescriptor.getInteger({sid2tid.blur})
+  }
+}
+
+function getStroke(actionDescriptor) {
+  if (!actionDescriptor.hasKey({sid2tid.frameFX})) {
+    return false
+  }
+
+  var styleDescriptor = actionDescriptor.getObjectValue({sid2tid.frameFX})
+
+  if (!styleDescriptor.getBoolean({sid2tid.enabled})) {
+    return false
+  }
+
+  return {
+    style: enumMap[styleDescriptor.getEnumerationValue({sid2tid.style})],
+    size: styleDescriptor.getInteger({sid2tid.size}),
+    color: colorDescriptorToHexColor(styleDescriptor.getObjectValue({sid2tid.color})),
+    opacity: Math.round(styleDescriptor.getDouble({sid2tid.opacity}))
+  }
 }
 
 function colorDescriptorToHexColor(colorDescriptor) {
