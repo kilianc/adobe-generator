@@ -1,11 +1,5 @@
-function map(fn) {
-  var map = []
-  for (var i = 0, l = this.length; i < l; i++) {
-    map.push(fn(this[i]))
-  }
-  return map
-}
+var layers = Array.prototype.slice.call(app.activeDocument.layers)
 
-JSON.stringify(map.call(app.activeDocument.layers, function (layer) {
+JSON.stringify(layers.map (function (layer) {
   return getLayerData(app.activeDocument, layer)
 }))
