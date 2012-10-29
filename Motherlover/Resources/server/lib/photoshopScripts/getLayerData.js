@@ -1,75 +1,4 @@
-﻿var enumMap = {}
-// align
-enumMap[stringIDToTypeID('left')] = 'left'
-enumMap[stringIDToTypeID('center')] = 'center'
-enumMap[stringIDToTypeID('right')] = 'right'
-enumMap[stringIDToTypeID('justifyLeft')] = 'justifyLeft'
-enumMap[stringIDToTypeID('justifyCenter')] = 'justifyCenter'
-enumMap[stringIDToTypeID('justifyRight')] = 'justifyRight'
-enumMap[stringIDToTypeID('justifyAll')] = 'justifyAll'
-// fontCaps
-enumMap[stringIDToTypeID('normal')] = 'normal'
-enumMap[stringIDToTypeID('allCaps')] = 'allCaps'
-enumMap[stringIDToTypeID('smallCaps')] = 'smallCaps'
-// baseline
-enumMap[stringIDToTypeID('superScript')] = 'superScript'
-enumMap[stringIDToTypeID('subScript')] = 'subScript'
-// autoKern
-enumMap[stringIDToTypeID('opticalKern')] = 'opticalKern'
-enumMap[stringIDToTypeID('metricsKern')] = 'metricsKern'
-// strikethrough
-enumMap[stringIDToTypeID('strikethroughOff')] = 'strikethroughOff'
-enumMap[stringIDToTypeID('xHeightStrikethroughOn')] = 'xHeightStrikethroughOn'
-// underline
-enumMap[stringIDToTypeID('underlineOff')] = 'underlineOff'
-enumMap[stringIDToTypeID('underlineOnLeftInVertical')] = 'underlineOnLeftInVertical'
-
-
-var idMap = {}
-idMap['transform'] = stringIDToTypeID('transform')
-idMap['xx'] = stringIDToTypeID('xx')
-idMap['xy'] = stringIDToTypeID('xy')
-idMap['yx'] = stringIDToTypeID('yx')
-idMap['yy'] = stringIDToTypeID('yy')
-idMap['tx'] = stringIDToTypeID('tx')
-idMap['ty'] = stringIDToTypeID('ty')
-idMap['textKey'] = stringIDToTypeID('textKey')
-idMap['textStyleRange'] = stringIDToTypeID('textStyleRange')
-idMap['from'] = stringIDToTypeID('from')
-idMap['to'] = stringIDToTypeID('to')
-idMap['textStyle'] = stringIDToTypeID('textStyle')
-idMap['fontPostScriptName'] = stringIDToTypeID('fontPostScriptName')
-idMap['fontName'] = stringIDToTypeID('fontName')
-idMap['fontStyleName'] = stringIDToTypeID('fontStyleName')
-idMap['size'] = stringIDToTypeID('size')
-idMap['horizontalScale'] = stringIDToTypeID('horizontalScale')
-idMap['verticalScale'] = stringIDToTypeID('verticalScale')
-idMap['syntheticBold'] = stringIDToTypeID('syntheticBold')
-idMap['syntheticItalic'] = stringIDToTypeID('syntheticItalic')
-idMap['autoLeading'] = stringIDToTypeID('autoLeading')
-idMap['leading'] = stringIDToTypeID('leading')
-idMap['tracking'] = stringIDToTypeID('tracking')
-idMap['baselineShift'] = stringIDToTypeID('baselineShift')
-idMap['autoKern'] = stringIDToTypeID('autoKern')
-idMap['fontCaps'] = stringIDToTypeID('fontCaps')
-idMap['baseline'] = stringIDToTypeID('baseline')
-idMap['strikethrough'] = stringIDToTypeID('strikethrough')
-idMap['underline'] = stringIDToTypeID('underline')
-idMap['color'] = stringIDToTypeID('color')
-idMap['red'] = stringIDToTypeID('red')
-idMap['green'] = stringIDToTypeID('green')
-idMap['blue'] = stringIDToTypeID('blue')
-idMap['paragraphStyleRange'] = stringIDToTypeID('paragraphStyleRange')
-idMap['paragraphStyle'] = stringIDToTypeID('paragraphStyle')
-idMap['align'] = stringIDToTypeID('align')
-idMap['hyphenate'] = stringIDToTypeID('hyphenate')
-idMap['firstLineIndent'] = stringIDToTypeID('firstLineIndent')
-idMap['startIndent'] = stringIDToTypeID('startIndent')
-idMap['endIndent'] = stringIDToTypeID('endIndent')
-idMap['spaceBefore'] = stringIDToTypeID('spaceBefore')
-idMap['spaceAfter'] = stringIDToTypeID('spaceAfter')
-
-function getLayerData(doc, layer) {
+﻿function getLayerData(doc, layer) {
   var layerData = {
     id: layer.id,
     name: layer.name,
@@ -82,23 +11,27 @@ function getLayerData(doc, layer) {
   }
 
   if (layerData.kind === 'LayerKind.TEXT') {
-    var textKey = getLayerAttr(layer, idMap['textKey']).getObjectValue(idMap['textKey'])
-    layerData.textContent = textKey.getString(idMap['textKey'])
+    var textKey = getLayerAttr(layer, {sid2tid.textKey}).getObjectValue({sid2tid.textKey})
+    layerData.textContent = textKey.getString({sid2tid.textKey})
 
     if (layerData.textContent) {
       // expose matrix if exists
-      if (textKey.hasKey(idMap['transform'])) {
-        var transformDescriptor = textKey.getObjectValue(idMap['transform'])
-        layerData.transform = {}
-        ;['xx', 'xy', 'yx', 'yy', 'tx', 'ty'].forEach(function (entry) {
-          layerData.transform[entry] = transformDescriptor.getDouble(idMap[entry])
-        })
+      if (textKey.hasKey({sid2tid.transform})) {
+        var transformDescriptor = textKey.getObjectValue({sid2tid.transform})
+        layerData.transform = {
+          xx: transformDescriptor.getDouble({sid2tid.xx}),
+          xy: transformDescriptor.getDouble({sid2tid.xy}),
+          yx: transformDescriptor.getDouble({sid2tid.yx}),
+          yy: transformDescriptor.getDouble({sid2tid.yy}),
+          tx: transformDescriptor.getDouble({sid2tid.tx}),
+          ty: transformDescriptor.getDouble({sid2tid.ty})
+        }
       } else {
         layerData.transform = false
       }
       // styles
-      layerData.textStyles = textStyleRangeToArray(textKey.getList(idMap['textStyleRange']))
-      layerData.paragraphStyles = paragraphStyleRangeToArray(textKey.getList(idMap['paragraphStyleRange']))
+      layerData.textStyles = textStyleRangeToArray(textKey.getList({sid2tid.textStyleRange}))
+      layerData.paragraphStyles = paragraphStyleRangeToArray(textKey.getList({sid2tid.paragraphStyleRange}))
     }
   } else if (layerData.kind === 'LayerKind.SOLIDFILL') {
     layerData.fillColor = getFillLayerColor(layer)
@@ -119,27 +52,27 @@ function textStyleRangeToArray(textStyleRange) {
 
   for (var i = 0, l = textStyleRange.count; i < l; i++) {
     styleRange = textStyleRange.getObjectValue(i)
-    textStyle = styleRange.getObjectValue(idMap['textStyle'])
+    textStyle = styleRange.getObjectValue({sid2tid.textStyle})
     textStyles.push({
-      from: styleRange.getInteger(idMap['from']),
-      to: styleRange.getInteger(idMap['to']),
-      fontPostScriptName: textStyle.getString(idMap['fontPostScriptName']),
-      fontName: textStyle.getString(idMap['fontName']),
-      size: Math.round(textStyle.getDouble(idMap['size'])),
-      horizontalScale: textStyle.hasKey(idMap['horizontalScale']) ? Math.round(textStyle.getDouble(idMap['horizontalScale'])) : 0,
-      verticalScale: textStyle.hasKey(idMap['verticalScale']) ? Math.round(textStyle.getDouble(idMap['verticalScale'])) : 0,
-      syntheticBold: textStyle.hasKey(idMap['syntheticBold']) ? Boolean(textStyle.getBoolean(idMap['syntheticBold'])) : false,
-      syntheticItalic: textStyle.hasKey(idMap['syntheticItalic']) ? Boolean(textStyle.getBoolean(idMap['syntheticItalic'])) : false,
-      autoLeading: textStyle.hasKey(idMap['autoLeading']) ? Boolean(textStyle.getBoolean(idMap['autoLeading'])) : true,
-      leading: textStyle.hasKey(idMap['leading']) ? textStyle.getInteger(idMap['leading']) : 'auto',
-      tracking: textStyle.hasKey(idMap['tracking']) ? textStyle.getInteger(idMap['tracking']) : 0,
-      baselineShift: textStyle.hasKey(idMap['baselineShift']) ? textStyle.getInteger(idMap['baselineShift']) : 0,
-      autoKern: textStyle.hasKey(idMap['autoKern']) ? enumMap[textStyle.getEnumerationValue(idMap['autoKern'])] : 'metricsKern',
-      fontCaps: textStyle.hasKey(idMap['fontCaps']) ? enumMap[textStyle.getEnumerationValue(idMap['fontCaps'])] : 'normal',
-      baseline: textStyle.hasKey(idMap['baseline']) ? enumMap[textStyle.getEnumerationValue(idMap['baseline'])] : 'normal',
-      strikethrough: textStyle.hasKey(idMap['strikethrough']) ? enumMap[textStyle.getEnumerationValue(idMap['strikethrough'])] : 'strikethroughOff',
-      underline: textStyle.hasKey(idMap['underline']) ? enumMap[textStyle.getEnumerationValue(idMap['underline'])] : 'underlineOff',
-      color: colorDescriptorToHexColor(textStyle.getObjectValue(idMap['color']))
+      from: styleRange.getInteger({sid2tid.from}),
+      to: styleRange.getInteger({sid2tid.to}),
+      fontPostScriptName: textStyle.getString({sid2tid.fontPostScriptName}),
+      fontName: textStyle.getString({sid2tid.fontName}),
+      size: Math.round(textStyle.getDouble({sid2tid.size})),
+      horizontalScale: textStyle.hasKey({sid2tid.horizontalScale}) ? Math.round(textStyle.getDouble({sid2tid.horizontalScale})) : 0,
+      verticalScale: textStyle.hasKey({sid2tid.verticalScale}) ? Math.round(textStyle.getDouble({sid2tid.verticalScale})) : 0,
+      syntheticBold: textStyle.hasKey({sid2tid.syntheticBold}) ? Boolean(textStyle.getBoolean({sid2tid.syntheticBold})) : false,
+      syntheticItalic: textStyle.hasKey({sid2tid.syntheticItalic}) ? Boolean(textStyle.getBoolean({sid2tid.syntheticItalic})) : false,
+      autoLeading: textStyle.hasKey({sid2tid.autoLeading}) ? Boolean(textStyle.getBoolean({sid2tid.autoLeading})) : true,
+      leading: textStyle.hasKey({sid2tid.leading}) ? textStyle.getInteger({sid2tid.leading}) : 'auto',
+      tracking: textStyle.hasKey({sid2tid.tracking}) ? textStyle.getInteger({sid2tid.tracking}) : 0,
+      baselineShift: textStyle.hasKey({sid2tid.baselineShift}) ? textStyle.getInteger({sid2tid.baselineShift}) : 0,
+      autoKern: textStyle.hasKey({sid2tid.autoKern}) ? enumMap[textStyle.getEnumerationValue({sid2tid.autoKern})] : 'metricsKern',
+      fontCaps: textStyle.hasKey({sid2tid.fontCaps}) ? enumMap[textStyle.getEnumerationValue({sid2tid.fontCaps})] : 'normal',
+      baseline: textStyle.hasKey({sid2tid.baseline}) ? enumMap[textStyle.getEnumerationValue({sid2tid.baseline})] : 'normal',
+      strikethrough: textStyle.hasKey({sid2tid.strikethrough}) ? enumMap[textStyle.getEnumerationValue({sid2tid.strikethrough})] : 'strikethroughOff',
+      underline: textStyle.hasKey({sid2tid.underline}) ? enumMap[textStyle.getEnumerationValue({sid2tid.underline})] : 'underlineOff',
+      color: colorDescriptorToHexColor(textStyle.getObjectValue({sid2tid.color}))
     })
   }
 
@@ -151,17 +84,17 @@ function paragraphStyleRangeToArray(paragraphStyleRange) {
 
   for (var i = 0, l = paragraphStyleRange.count; i < l; i++) {
     paragraphRange = paragraphStyleRange.getObjectValue(i)
-    paragraphStyle = paragraphRange.getObjectValue(idMap['paragraphStyle'])
+    paragraphStyle = paragraphRange.getObjectValue({sid2tid.paragraphStyle})
     paragraphStyles.push({
-      from: paragraphRange.getInteger(idMap['from']),
-      to: paragraphRange.getInteger(idMap['to']),
-      align: paragraphStyle.hasKey(idMap['align']) ? enumMap[paragraphStyle.getEnumerationValue(idMap['align'])] : 'left',
-      hyphenate: paragraphStyle.hasKey(idMap['hyphenate']) ? Boolean(paragraphStyle.getBoolean(idMap['hyphenate'])) : true,
-      firstLineIndent: paragraphStyle.hasKey(idMap['firstLineIndent']) ? paragraphStyle.getInteger(idMap['firstLineIndent']) : 0,
-      startIndent: paragraphStyle.hasKey(idMap['startIndent']) ? paragraphStyle.getInteger(idMap['startIndent']) : 0,
-      endIndent: paragraphStyle.hasKey(idMap['endIndent']) ? paragraphStyle.getInteger(idMap['endIndent']) : 0,
-      spaceBefore: paragraphStyle.hasKey(idMap['spaceBefore']) ? paragraphStyle.getInteger(idMap['spaceBefore']) : 0,
-      spaceAfter: paragraphStyle.hasKey(idMap['spaceAfter']) ? paragraphStyle.getInteger(idMap['spaceAfter']) : 0
+      from: paragraphRange.getInteger({sid2tid.from}),
+      to: paragraphRange.getInteger({sid2tid.to}),
+      align: paragraphStyle.hasKey({sid2tid.align}) ? enumMap[paragraphStyle.getEnumerationValue({sid2tid.align})] : 'left',
+      hyphenate: paragraphStyle.hasKey({sid2tid.hyphenate}) ? Boolean(paragraphStyle.getBoolean({sid2tid.hyphenate})) : true,
+      firstLineIndent: paragraphStyle.hasKey({sid2tid.firstLineIndent}) ? paragraphStyle.getInteger({sid2tid.firstLineIndent}) : 0,
+      startIndent: paragraphStyle.hasKey({sid2tid.startIndent}) ? paragraphStyle.getInteger({sid2tid.startIndent}) : 0,
+      endIndent: paragraphStyle.hasKey({sid2tid.endIndent}) ? paragraphStyle.getInteger({sid2tid.endIndent}) : 0,
+      spaceBefore: paragraphStyle.hasKey({sid2tid.spaceBefore}) ? paragraphStyle.getInteger({sid2tid.spaceBefore}) : 0,
+      spaceAfter: paragraphStyle.hasKey({sid2tid.spaceAfter}) ? paragraphStyle.getInteger({sid2tid.spaceAfter}) : 0
     })
   }
 
@@ -184,8 +117,8 @@ function getFillLayerColor(layer) {
 
 function colorDescriptorToHexColor(colorDescriptor) {
   var color = new SolidColor()
-  color.rgb.red = colorDescriptor.getInteger(idMap['red'])
-  color.rgb.green = colorDescriptor.getInteger(idMap['green'])
-  color.rgb.blue = colorDescriptor.getInteger(idMap['blue'])
+  color.rgb.red = colorDescriptor.getInteger({sid2tid.red})
+  color.rgb.green = colorDescriptor.getInteger({sid2tid.green})
+  color.rgb.blue = colorDescriptor.getInteger({sid2tid.blue})
   return '#' + color.rgb.hexValue
 }
