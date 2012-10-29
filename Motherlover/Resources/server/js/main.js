@@ -104,7 +104,7 @@ $().ready(function () {
     var textStyles = layer.textStyles.slice(0)
     var textContent = layer.textContent
     var paragraphs = layer.paragraphStyles.map(function (paragraphStyle) {
-      var spans = createSpansForParagraphs(textStyles, paragraphStyle.from, paragraphStyle.to, textContent)
+      var spans = createSpansForParagraphs(textStyles, paragraphStyle.from, paragraphStyle.to, textContent, layer.transform)
       var p = $('<p>').css({
         textAlign: paragraphStyle.align,
         webkitHyphens: 'auto'
@@ -116,7 +116,7 @@ $().ready(function () {
     return paragraphs
   }
 
-  function createSpansForParagraphs(textStyles, from, to, textContent) {
+  function createSpansForParagraphs(textStyles, from, to, textContent, transform) {
     var textStyle, spanText, css, spans = []
     var stylesRanges = []
 
@@ -132,6 +132,10 @@ $().ready(function () {
 
       spanText = textContent.substring(Math.max(textStyle.from, from), Math.min(textStyle.to, to)).replace('\n', '<br>')
 
+      if (transform && transform.xx.toFixed(2) === transform.yy.toFixed(2)) {
+        textStyle.size = Math.abs(Math.round(textStyle.size * transform.xx))
+      }
+
       css = {
         font: textStyle.size + 'px "' + textStyle.fontPostScriptName + '"',
         color: textStyle.color
@@ -140,9 +144,11 @@ $().ready(function () {
       if (textStyle.underline === 'underlineOnLeftInVertical') {
         css.textDecoration = 'underline'
       }
+
       if (textStyle.strikethrough === 'xHeightStrikethroughOn') {
         css.textDecoration = css.textDecoration ? css.textDecoration + ' line-through' : 'line-through'
       }
+
       if (textStyle.fontCaps === 'allCaps') {
         css.textTransform = 'uppercase'
       } else if (textStyle.fontCaps === 'smallCaps') {
