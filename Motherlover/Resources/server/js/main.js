@@ -141,6 +141,9 @@ $().ready(function () {
         color: textStyle.color
       }
 
+      css.lineHeight = textStyle.leading + 'px'
+      css.letterSpacing = (6 * textStyle.tracking / 200) + 'px'
+
       if (textStyle.underline === 'underlineOnLeftInVertical') {
         css.textDecoration = 'underline'
       }
