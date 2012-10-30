@@ -159,7 +159,7 @@ function getShadow(actionDescriptor, isOuter) {
     globalAngle: getLayerData.globalAngle,
     distance: styleDescriptor.getInteger({sid2tid.distance}),
     chokeMatte: styleDescriptor.getInteger({sid2tid.chokeMatte}),
-    blur: styleDescriptor.getInteger({sid2tid.blur})
+    size: styleDescriptor.getInteger({sid2tid.blur})
   }
 }
 
@@ -180,7 +180,7 @@ function getGlow(actionDescriptor, isOuter) {
     color: colorDescriptorToHexColor(styleDescriptor.getObjectValue({sid2tid.color})),
     opacity: Math.round(styleDescriptor.getDouble({sid2tid.opacity})),
     spread: styleDescriptor.getInteger({sid2tid.chokeMatte}),
-    blur: styleDescriptor.getInteger({sid2tid.blur})
+    size: styleDescriptor.getInteger({sid2tid.blur})
   }
 }
 

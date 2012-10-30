@@ -73,7 +73,7 @@ $().ready(function () {
       height: (layer.bounds[3] - layer.bounds[1])  + 'px',
       display: layer.isVisible ? 'block' : 'none',
       zIndex: layer.index,
-      opacity: layer.opacity
+      opacity: layer.opacity / 100
     }
 
     switch (layer.kind) {
@@ -86,10 +86,10 @@ $().ready(function () {
       case 'LayerKind.SOLIDFILL':
         styles.backgroundColor = layer.fillColor
         element = element || $('<div id="ml-' + layer.id + '" class="solidfill"></div>')
+        createDropShadow(styles, layer)
         element.css(styles)
         break
       case 'LayerKind.NORMAL':
-        styles.opacity = 1
         styles.backgroundColor = 'transparent'
         styles.backgroundImage = 'url("images/layers/' + layer.name + '")'
         element = element || $('<div id="ml-' + layer.id + '" class="normal"></div>')
@@ -162,5 +162,24 @@ $().ready(function () {
     }
 
     return spans
+  }
+
+  function createDropShadow(styles, layer) {
+    if (!layer.layerStyles || !layer.layerStyles.dropShadow) {
+      styles.boxShadow = 'none'
+      return
+    }
+
+    var dropShadowData = layer.layerStyles.dropShadow
+    var angle = (180 - (dropShadowData.useGlobalAngle ? dropShadowData.globalAngle : dropShadowData.localLightingAngle)) * Math.PI / 180
+    var x = Math.round(Math.cos(angle) * dropShadowData.distance)
+    var y = Math.round(Math.sin(angle) * dropShadowData.distance)
+    var chokeMatte = dropShadowData.size * dropShadowData.chokeMatte / 100
+    var blur = dropShadowData.size - chokeMatte
+    var rgb = dropShadowData.color
+    var rgba = 'rgba(' + parseInt(rgb.slice(1, 3), 16) + ', ' + parseInt(rgb.slice(3, 5), 16) + ', ' + parseInt(rgb.slice(5, 7), 16) + ', ' + dropShadowData.opacity / 100 + ')'
+
+    styles.boxShadow = x + 'px ' + y + 'px ' + blur + 'px ' + chokeMatte + 'px ' + rgba
+    alert(styles.boxShadow)
   }
 })
