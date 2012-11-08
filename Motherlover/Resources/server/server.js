@@ -1,28 +1,17 @@
 var http = require('http'),
     net = require('net'),
     fs = require('fs'),
-    io = require('socket.io'),
+    socketio = require('socket.io'),
     express = require('express'),
-    rimraf = require('rimraf'),
     cocoa = require('./lib/cocoa')(15000),
     motherlover = require('./lib/motherlover')
 
-// cleanup
-rimraf.sync(__dirname + '/public/images/layers')
-fs.mkdirSync(__dirname + '/public/images/layers')
-
 // PS connection
-var motherloverClient = motherlover()
-motherloverClient.on('layers', function (layers) {
-  io.sockets.emit('layers', layers)
-  process.cocoaSend({ name: 'layers', data: layers })
-}).on('currentDocumentChanged', function (currentDocumentPath) {
-  io.sockets.emit('currentDocumentChanged', currentDocumentPath)
-  process.cocoaSend({ name: 'currentDocumentChanged', data: currentDocumentPath })
-}).on('layerPngReady', function (layer) {
-  io.sockets.emit('layerPngReady', layer.id)
-  process.cocoaSend({ name: 'layerPngReady', data: layer.id })
-}).on('error', function (err, response) {
+
+ml.use()
+
+
+ml.on('error', function (err, response) {
   process.cocoaSend({ name: 'error', data: {
     message: err.message,
     stack: err.stack,
@@ -31,37 +20,12 @@ motherloverClient.on('layers', function (layers) {
   } })
 })
 
-process.on('cocoaMessage', function (message) {
-  message.name !== 'ping' && process.cocoaSend({ name: 'back', message: message })
-  switch (message.name) {
-    case 'connect':
-      motherloverClient.connect(message.host, message.port, message.password, 500, function (err) {
-        if (!err) {
-          process.cocoaSend({ name: 'connected' })
-        } else {
-          throw err
-        }
-      })
-    break
-    case 'disconnect':
-      motherloverClient.close()
-      process.cocoaSend({ name: 'disconnected' })
-    break
-  }
-})
 
 // http server
 var app = express()
 var server = http.createServer(app)
-var io = io.listen(server, { log: false })
-
-io.sockets.on('connection', function (socket) {
-  io.sockets.emit('fontList', motherloverClient.photoshopData.fontList || [])
-  io.sockets.emit('layers', motherloverClient.photoshopData.layers || [])
-  io.sockets.emit('currentDocumentChanged', motherloverClient.photoshopData.currentDocumentPath || '')
-})
-
-app.use(express.static(__dirname + '/public'))
+var sio = socketio.listen(server, { log: false })
+var ml = motherlover(app, sio)
 
 // get a random available port
 net.createServer().once('close', function() {
@@ -71,6 +35,25 @@ net.createServer().once('close', function() {
   this.availablePort = this.address().port
   this.close()
 }).listen(0)
+
+process.on('cocoaMessage', function (message) {
+  message.name !== 'ping' && process.cocoaSend({ name: 'back', message: message })
+  switch (message.name) {
+    case 'connect':
+      ml.connect(message.host, message.port, message.password, 500, function (err) {
+        if (!err) {
+          process.cocoaSend({ name: 'connected' })
+        } else {
+          throw err
+        }
+      })
+    break
+    case 'disconnect':
+      ml.close()
+      process.cocoaSend({ name: 'disconnected' })
+    break
+  }
+})
 
 process.on('uncaughtException', function (err) {
   console.error(err, err.stack)

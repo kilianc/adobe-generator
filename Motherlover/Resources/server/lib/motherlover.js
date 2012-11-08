@@ -1,13 +1,20 @@
 var EventEmitter = require('events').EventEmitter,
     photoshop = require('./photoshop'),
-    photoshopScripts = require('./photoshopScripts'),
-    layerToPng = require('./layer_to_png')
+    jsx = require('../jsx')
 
-var Motherlover = module.exports = function Motherlover() {
-  if (!(this instanceof Motherlover)) {
-    return new Motherlover()
-  }
+var Motherlover = module.exports = function Motherlover(app, sio) {
+  if (!(this instanceof Motherlover)) return new Motherlover(app, sio)
+
   this.photoshopData = {}
+  this.sio = sio
+  this.app = app
+
+  sio.sockets.on('connection', function (socket) {
+    sio.sockets.emit('layers', this.photoshopData.layers || [])
+    sio.sockets.emit('currentDocumentChanged', this.photoshopData.currentDocumentPath || '')
+  })
+
+  app.use(express.static(__dirname + '/../public'))
 }
 
 Motherlover.prototype.__proto__ = EventEmitter.prototype
@@ -17,7 +24,7 @@ Motherlover.prototype.connect = function connect(host, port, password, timeout, 
 
   self.photoshop && self.photoshop.destroy()
   self.photoshop = photoshop()
-  // this.photoshop.log = true
+
   self.photoshopData = {
     layers: null,
     currentDocumentPath: null,
@@ -40,43 +47,10 @@ Motherlover.prototype.connect = function connect(host, port, password, timeout, 
       }
 
       if (!err) {
-        // subscriptions
-        self.photoshop.subscribe('currentDocumentChanged').emit('currentDocumentChanged')
-        self.photoshop.subscribe('documentChanged').emit('documentChanged')
-
-        self.photoshop.execute(photoshopScripts.getFontList, function (err, response) {
-          if (err) {
-            self.emit('error', err, response)
-          } else {
-            self.photoshopData.fontList = JSON.parse(response.body)
-          }
-        })
+        //
       }
 
       callback && callback()
-    })
-  })
-
-  self.photoshop.on('currentDocumentChanged', function (err, documentId) {
-    self.photoshop.execute(photoshopScripts.getActiveDocumentPath, function (err, response) {
-      if (err) {
-        self.emit('error', err, response)
-      } else {
-        self.photoshopData.currentDocumentPath = response.body ? JSON.parse(response.body) : 'NOT_SAVED_YET'
-        self.emit('currentDocumentChanged', self.photoshopData.currentDocumentPath)
-      }
-    })
-  })
-
-  self.photoshop.on('documentChanged', function (err, data) {
-    self.photoshop.execute(photoshopScripts.getLayersData, function (err, response) {
-      if (err) {
-        self.emit('error', err, response)
-      } else {
-        self.photoshopData.layers = response.body ? JSON.parse(response.body) : []
-        self.photoshopData.layers.forEach(self.prepareLayerData.bind(self))
-        self.emit('layers', self.photoshopData.layers)
-      }
     })
   })
 }

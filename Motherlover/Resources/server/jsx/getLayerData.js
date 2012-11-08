@@ -1,4 +1,4 @@
-function getLayerData(doc, layer) {
+﻿function getLayerData(doc, layer) {
   var layerBounds = layer.boundsNoEffects
   var layerData = {
     id: layer.id,

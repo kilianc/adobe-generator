@@ -44,6 +44,7 @@
 	[[NSUserNotificationCenter defaultUserNotificationCenter] setDelegate:self];
 	
 	scriptPath = [NSString stringWithFormat:@"%@/%@", [[NSBundle mainBundle] resourcePath], @"server"];
+	scriptPath = @"/Volumes/WS/motherlover/server_";
 	
 	nodeProcess = [KCNodeJS process];
 	[nodeProcess setDelegate:self];
