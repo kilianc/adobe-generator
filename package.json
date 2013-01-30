@@ -1,13 +1,13 @@
 {
   "author": "Kilian Ciuffolo <me@nailik.org> (http://nailik.org)",
-  "name": "motherlover",
-  "description": "Realtime PSD/HTML collaboration tool",
-  "version": "0.9.0",
+  "name": "generator",
+  "description": "",
+  "version": "0.0.2",
   "repository": {
     "type": "git",
-    "url": "http://github.com/kilianc/motherlover.git"
+    "url": "http://github.com/kilianc/generator.git"
   },
-  "main": "./",
+  "main": "./app.js",
   "scripts": {
     "test": "make test"
   },
