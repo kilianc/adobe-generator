@@ -7,9 +7,9 @@
     "type": "git",
     "url": "http://github.com/kilianc/generator.git"
   },
-  "main": "./app.js",
+  "main": "./app",
   "bin": {
-    "generator": "./app.js"
+    "generator": "./app"
   },
   "scripts": {
     "test": "make test"

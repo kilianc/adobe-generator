@@ -12,11 +12,24 @@ program
   .option('-H, --host <s>', 'The Photoshop server host', 'localhost')
   .option('-P, --password <s>', 'The Photoshop server password', 'password')
   .option('-t, --timeout <ms>', 'Time before timeout', 500)
+  .option('-l, --list', 'Lists installed plugins')
   .option('-u, --use \'<name> <name> ...\'', 'Explicitly activate plugins')
   .option('-U, --nuse \'<name> <name> ...\'', 'Explicitly disable plugins', '')
   .parse(process.argv)
 
 var generator = new Generator()
+
+if (program.list) {
+  var plugins = generator.getPluginsList()
+
+  console.log('\n  Installed plugins:\n')
+  Object.keys(plugins).forEach(function (plugin) {
+    console.log('  - %s: %s', plugin, plugins[plugin])
+  })
+  console.log()
+
+  process.exit()
+}
 
 generator.connect(program.host, program.port, program.password, program.timeout, function (err) {
   if (err) throw err
