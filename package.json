@@ -1,13 +1,16 @@
 {
   "author": "Kilian Ciuffolo <me@nailik.org> (http://nailik.org)",
   "name": "generator",
-  "description": "",
+  "description": "The missing link",
   "version": "0.0.2",
   "repository": {
     "type": "git",
     "url": "http://github.com/kilianc/generator.git"
   },
   "main": "./app.js",
+  "bin": {
+    "generator": "./app.js"
+  },
   "scripts": {
     "test": "make test"
   },

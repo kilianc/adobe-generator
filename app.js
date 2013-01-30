@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 var http = require('http'),
     net = require('net'),
     fs = require('fs'),
@@ -5,9 +6,9 @@ var http = require('http'),
     Generator = require('./lib/generator')
 
 argv
-  .option('-p, --port <s>', 'The Photoshop server port')
-  .option('-H, --host <s>', 'The Photoshop server host')
-  .option('-P, --password <s>', 'The Photoshop server password')
+  .option('-p, --port <s>', 'The Photoshop server port', 49494)
+  .option('-H, --host <s>', 'The Photoshop server host', 'localhost')
+  .option('-P, --password <s>', 'The Photoshop server password', 'password')
   .parse(process.argv)
 
 var generator = new Generator()
