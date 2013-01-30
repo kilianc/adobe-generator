@@ -1,4 +1,6 @@
-#!/usr/bin/env node
+#!/bin/sh
+cd `pwd`/$(dirname $0)/ && bin/node << EOF
+
 var http = require('http'),
     net = require('net'),
     fs = require('fs'),
