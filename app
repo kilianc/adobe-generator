@@ -8,13 +8,13 @@ var http = require('http'),
 
 program
   .version(version)
-  .option('-p, --port <s>', 'The Photoshop server port', 49494)
-  .option('-H, --host <s>', 'The Photoshop server host', 'localhost')
-  .option('-P, --password <s>', 'The Photoshop server password', 'password')
-  .option('-t, --timeout <ms>', 'Time before timeout', 500)
-  .option('-l, --list', 'Lists installed plugins')
-  .option('-u, --use \'<name> <name> ...\'', 'Explicitly activate plugins')
-  .option('-U, --nuse \'<name> <name> ...\'', 'Explicitly disable plugins', '')
+  .option('-p, --port <s>', 'the Photoshop server port', 49494)
+  .option('-H, --host <s>', 'the Photoshop server host', 'localhost')
+  .option('-P, --password <s>', 'the Photoshop server password', 'password')
+  .option('-t, --timeout <ms>', 'time before timeout', 500)
+  .option('-l, --list', 'lists installed plugins')
+  .option('-u, --use \'<name> <name> ...\'', 'explicitly activate plugins')
+  .option('-U, --nuse \'<name> <name> ...\'', 'explicitly disable plugins', '')
   .parse(process.argv)
 
 var generator = new Generator()
