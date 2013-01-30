@@ -1,0 +1,25 @@
+{
+  "author": "Kilian Ciuffolo <me@nailik.org> (http://nailik.org)",
+  "name": "generator",
+  "description": "",
+  "version": "0.0.2",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/kilianc/generator.git"
+  },
+  "main": "./app.js",
+  "scripts": {
+    "test": "make test"
+  },
+  "engines": {
+    "node": ">= v0.8.x"
+  },
+  "dependencies": {
+    "bufferjoiner": "0.1.x",
+    "commander": "0.1.x"
+  },
+  "devDependencies": {
+    "mocha": "1.3.x",
+    "chai": "1.2.x"
+  }
+}
