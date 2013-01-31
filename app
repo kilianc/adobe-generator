@@ -1,5 +1,4 @@
-#!/bin/sh
-cd `pwd`/$(dirname $0)/ && bin/node << EOF
+#!bin/node
 
 var http = require('http'),
     net = require('net'),
